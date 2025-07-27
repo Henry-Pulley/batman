@@ -1,0 +1,26 @@
+# Task and documentation files
+TASK.md
+CLAUDE.md
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+venv/
+
+# Claude cache
+.claude/
+
+# Output files
+output/
+
+# Python init files in src
+src/__init__.py
+
+# Environment variables
+.env
+.env.local
