@@ -97,8 +97,8 @@ async def scrape_profile_comments(steamid64, session):
             if len(page_comments) < count:
                 break
                     
-                # Move to next page
-                start += count
+            # Move to next page
+            start += count
 
         return comments
 
@@ -277,6 +277,99 @@ def parse_steam_date(date_str):
     except Exception as e:
         logging.warning(f"Failed to parse date '{date_str}': {e}")
         return None
+
+
+@retry_with_exponential_backoff()
+async def scrape_friends_list(steamid64, session):
+    """
+    Scrapes the friends list from a Steam profile
+    
+    Args:
+        steamid64: The Steam ID to scrape friends from
+        session: aiohttp session (required)
+        
+    Returns:
+        list: List of friend Steam IDs
+    """
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+    }
+    
+    try:
+        friends = []
+        
+        # Try the friends list URL
+        friends_url = f"https://steamcommunity.com/profiles/{steamid64}/friends/"
+        
+        try:
+            async with session.get(friends_url, headers=headers) as response:
+                if response.status != 200:
+                    logging.warning(f"Friends list request failed with status {response.status} for {steamid64}")
+                    return []
+                    
+                html_content = await response.text()
+        except aiohttp.ClientConnectorError as e:
+            logging.error(f"Failed to connect to Steam friends page: {e}")
+            return []
+        except asyncio.TimeoutError as e:
+            logging.error(f"Steam friends page request timed out: {e}")
+            return []
+        except aiohttp.ClientError as e:
+            logging.error(f"Network error accessing Steam friends page: {e}")
+            return []
+            
+        # Parse the HTML
+        soup = BeautifulSoup(html_content, 'lxml')
+        
+        # Check if friends list is private
+        if "This profile is private" in html_content or "Friends (Private)" in html_content:
+            logging.info(f"Friends list is private for profile {steamid64}")
+            return []
+            
+        # Look for friend profile links using multiple selectors
+        friend_links = []
+        for selector in [
+            'a[href*="/profiles/"]',
+            'a[href*="/id/"]',
+            '.friend_block_v2 a',
+            '.friend_blocks a',
+            '.friendBlock a'
+        ]:
+            friend_links.extend(soup.select(selector))
+        
+        # Extract friend Steam IDs from URLs
+        for link in friend_links:
+            href = link.get('href', '')
+            if '/profiles/' in href or '/id/' in href:
+                # Extract the Steam ID or custom ID from the URL
+                if '/profiles/' in href:
+                    # Direct Steam ID format
+                    steamid_match = re.search(r'/profiles/(\d+)', href)
+                    if steamid_match:
+                        friend_steamid = steamid_match.group(1)
+                        if friend_steamid not in friends:
+                            friends.append(friend_steamid)
+                elif '/id/' in href:
+                    # Custom URL format - we'll need to resolve this later
+                    custom_id_match = re.search(r'/id/([^/]+)', href)
+                    if custom_id_match:
+                        # Store the full URL for later resolution
+                        friend_url = href
+                        if friend_url not in friends:
+                            friends.append(friend_url)
+        
+        # Limit friends to prevent excessive requests
+        max_friends = config.max_friends_per_profile
+        return friends[:max_friends]
+        
+    except Exception as e:
+        logging.error(f"Error scraping friends list for {steamid64}: {e}")
+        return []
 
 
 def check_for_hate_speech(comment_text):

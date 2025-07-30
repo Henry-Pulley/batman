@@ -21,9 +21,9 @@ def view_all_comments():
             for comment in comments:
                 print(f"ID:                {comment['id']}")
                 print(f"Commenter SteamID: {comment['profile_steamid']}")
-                print(f"Commenter Alias:   {comment['commenter_alias']}")
+                print(f"Commenter Alias:   \033[42m{comment['commenter_alias']}\033[0m")
                 print(f"Friend Path:       {comment['friend_path']}")
-                print(f"Comment:           {comment['comment_text']}")
+                print(f"Comment:           \033[43m{comment['comment_text']}\033[0m")
                 # Format the comment_date timestamp
                 comment_dt = comment['comment_date']
                 comment_date = comment_dt.strftime('%Y-%m-%d')

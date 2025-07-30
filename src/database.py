@@ -1,10 +1,8 @@
 """PostgreSQL database storage and management for flagged comments"""
-
-import psycopg2
-from psycopg2.extras import RealDictCursor
 import logging
 import os
-from datetime import datetime
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -70,6 +68,16 @@ class PostgresDatabase:
             steam_id VARCHAR(17) UNIQUE NOT NULL,
             aliases TEXT NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS unprocessed_profiles (
+            id SERIAL PRIMARY KEY,
+            steam_id VARCHAR(17) NOT NULL,
+            friend_path TEXT NOT NULL,
+            depth INTEGER NOT NULL,
+            added_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            shutdown_reason VARCHAR(100) NOT NULL,
+            UNIQUE(steam_id, friend_path)
+        );
         """
         
         try:
@@ -84,6 +92,9 @@ class PostgresDatabase:
             )
             self.cursor.execute(
                 "CREATE INDEX IF NOT EXISTS idx_villain_steamid ON villains(steam_id)"
+            )
+            self.cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_unprocessed_steamid ON unprocessed_profiles(steam_id)"
             )
             
             self.conn.commit()
@@ -128,7 +139,52 @@ class PostgresDatabase:
             return False
 
     
-
+    def insert_flagged_comments_batch(self, comments_data_list):
+        """
+        Batch insert multiple flagged comments for better performance
+        
+        Args:
+            comments_data_list: List of comment data dictionaries
+            
+        Returns:
+            int: Number of comments inserted
+        """
+        if not comments_data_list:
+            return 0
+            
+        try:
+            # Prepare data for bulk insert
+            values = []
+            for comment_data in comments_data_list:
+                values.append((
+                    comment_data['commenter_steamid'],
+                    comment_data['commenter_alias'],
+                    comment_data['profile_steamid'],
+                    comment_data['comment_text'],
+                    comment_data['comment_date'],
+                    comment_data['friend_path']
+                ))
+            
+            # Use execute_values for efficient bulk insert
+            from psycopg2.extras import execute_values
+            
+            query = """
+            INSERT INTO flagged_comments
+            (commenter_steamid, commenter_alias, profile_steamid,
+            comment_text, comment_date, friend_path)
+            VALUES %s
+            ON CONFLICT (commenter_steamid, profile_steamid, comment_text) DO NOTHING
+            """
+            
+            execute_values(self.cursor, query, values)
+            self.conn.commit()
+            
+            return len(values)
+        except psycopg2.Error as e:
+            logging.error(f"Failed to batch insert flagged comments: {e}")
+            self.conn.rollback()
+            return 0
+    
     def get_all_flagged_comments_detailed(self):
         """
         Returns all flagged comments with full details for viewing
@@ -268,6 +324,61 @@ class PostgresDatabase:
         """
         villain = self.get_villain(steam_id)
         return villain is not None
+
+    def save_unprocessed_profiles(self, profiles_data, shutdown_reason):
+        """
+        Saves unprocessed profiles to the database
+        
+        Args:
+            profiles_data (list): List of tuples (steam_id, friend_path, depth)
+            shutdown_reason (str): Reason for shutdown (e.g., "profile_limit", "time_limit")
+            
+        Returns:
+            int: Number of profiles saved
+        """
+        if not profiles_data:
+            return 0
+            
+        try:
+            # Prepare data for bulk insert
+            values = []
+            for steam_id, friend_path, depth in profiles_data:
+                values.append((steam_id, friend_path, depth, shutdown_reason))
+            
+            # Use execute_values for efficient bulk insert
+            from psycopg2.extras import execute_values
+            
+            query = """
+            INSERT INTO unprocessed_profiles (steam_id, friend_path, depth, shutdown_reason)
+            VALUES %s
+            ON CONFLICT (steam_id, friend_path) DO NOTHING
+            """
+            
+            execute_values(self.cursor, query, values)
+            self.conn.commit()
+            
+            logging.info(f"Saved {len(values)} unprocessed profiles due to {shutdown_reason}")
+            return len(values)
+        except psycopg2.Error as e:
+            logging.error(f"Failed to save unprocessed profiles: {e}")
+            self.conn.rollback()
+            return 0
+
+    def get_unprocessed_profiles_count(self):
+        """
+        Returns the count of unprocessed profiles
+        
+        Returns:
+            int: Number of unprocessed profiles
+        """
+        try:
+            query = "SELECT COUNT(*) as count FROM unprocessed_profiles"
+            self.cursor.execute(query)
+            result = self.cursor.fetchone()
+            return result['count'] if result else 0
+        except psycopg2.Error as e:
+            logging.error(f"Failed to get unprocessed profiles count: {e}")
+            return 0
 
     def close(self):
         """Closes the database connection"""
