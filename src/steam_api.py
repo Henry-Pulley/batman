@@ -1,21 +1,25 @@
 """Steam API integration and profile resolution functions"""
 
-import asyncio
 import aiohttp
+import time
 from .config import config
 from .retry_utils import retry_with_exponential_backoff
 
+# Simple cache for resolved Steam IDs
+_steam_id_cache = {}
+_cache_ttl = 3600  # 1 hour
+
 async def resolve_steam_url(url, session):
     """
-    Resolves a Steam profile URL to a SteamID64
-
-    Args:
-        url: Steam profile URL
-        session: aiohttp session (required)
-
-    Returns:
-        steamid64: 64-bit Steam ID
+    Resolves a Steam profile URL to a SteamID64 with caching
     """
+    # Check cache first
+    cache_key = url
+    if cache_key in _steam_id_cache:
+        cached_id, timestamp = _steam_id_cache[cache_key]
+        if time.time() - timestamp < _cache_ttl:
+            return cached_id
+        
     # Extract unique identifier from URL
     if "/id/" in url:
         identifier = url.split("/id/")[1].strip("/")
@@ -27,10 +31,13 @@ async def resolve_steam_url(url, session):
     # Determine if identifier is alias or SteamID64
     if identifier.isdigit() and len(identifier) == 17:
         # SteamID64 is a 17-digit number
-        return identifier
+        result = identifier
     else:
         # Assume it's an alias
-        return await resolve_vanity_url(identifier, session)
+        result = await resolve_vanity_url(identifier, session)
+
+    _steam_id_cache[cache_key] = (result, time.time())
+    return result
 
 @retry_with_exponential_backoff()
 async def resolve_vanity_url(vanity_name, session):

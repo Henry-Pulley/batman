@@ -55,9 +55,9 @@ def _retry_logic_generator(func_name: str, max_retries: int, base_delay: float,
 
 def retry_with_exponential_backoff(
     max_retries: int = config.max_retries,
-    base_delay: float = 1.0,
-    max_delay: float = 60.0,
-    backoff_factor: float = 2.0,
+    base_delay: float = 0.5,
+    max_delay: float = 10,
+    backoff_factor: float = 1.5,
     exceptions: Optional[Tuple[Type[Exception], ...]] = None
 ):
     

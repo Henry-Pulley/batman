@@ -5,21 +5,35 @@ Main entry point for the application
 """
 
 import sys
+import signal
 import argparse
 import asyncio
 import logging
-from aiohttp import ClientError, ClientConnectorError
+import logging.config
 import psycopg2
+from aiohttp import ClientError, ClientConnectorError
 from dotenv import load_dotenv
 from src.config import config, compile_hate_patterns
 from src.recursive_search import recursive_profile_search
 from src.validators import SafetyValidator
+from src.database_pool import DatabasePool
+from src.logging_config import LOGGING_CONFIG
+
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Initialize safety validator
 validator = SafetyValidator()
+
+def signal_handler(signum, frame):
+    """Handle shutdown signals gracefully"""
+    print("\nShutting down gracefully...")
+    # Close database connections
+    if hasattr(DatabasePool, 'db_pool'):
+        DatabasePool.db_pool.close_all()
+    sys.exit(0)
+
 
 def validate_url(url):
     """Validate Steam profile URL using SafetyValidator."""
@@ -74,28 +88,19 @@ Examples:
     return parser.parse_args()
 
 def main():
+    # Set up signal handlers
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+
     # Parse command line arguments
     args = parse_arguments()
     
     # Configure logging
-    logging.basicConfig(
-        level=config.log_level,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler(config.log_file),
-            logging.StreamHandler()
-        ]
-    )
+    logging.config.dictConfig(LOGGING_CONFIG)
     
     # Initialize compiled regex patterns for hate speech detection
     compile_hate_patterns()
     logging.info("Compiled regex patterns for hate speech detection")
-
-    # Check API key
-    if config.steam_api_key == "YOUR_STEAM_API_KEY_HERE":
-        print("Error: Please set your Steam API key in config.py")
-        print("You can get an API key from: https://steamcommunity.com/dev/apikey")
-        sys.exit(1)
 
     # Determine URLs to analyze
     urls = []

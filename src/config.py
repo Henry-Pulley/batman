@@ -12,24 +12,41 @@ class Config(BaseSettings):
     steam_api_base: str = "https://api.steampowered.com"
 
     # Rate limiting
-    request_delay: float = 5.0
-    max_retries: int = 3
-    max_concurrent_requests: int = 3
-    semaphore_timeout: float = 30.0
+    request_delay: float = Field(default=0.5, alias='REQUEST_DELAY') # work towards 0.1
+    max_retries: int = Field(default=2, alias='MAX_RETRIES')
+    max_concurrent_requests: int = Field(default=10, alias='MAX_CONCURRENT_REQUESTS') # work towards 50
+    semaphore_timeout: float = Field(default=30.0, alias='SEMAPHORE_TIMEOUT')
+
+    # Connection settings
+    connection_pool_size: int = Field(default=100, alias='CONNECTION_POOL_SIZE')
+    keepalive_timeout: int = Field(default=30, alias='KEEPALIVE_TIMEOUT')
+    
+    # Database connection pool (new)
+    postgres_pool_min: int = Field(default=5, alias='POSTGRES_POOL_MIN')
+    postgres_pool_max: int = Field(default=20, alias='POSTGRES_POOL_MAX')
+    
+    # Database connection settings
+    postgres_host: str = Field(default="localhost", alias='POSTGRES_HOST')
+    postgres_port: int = Field(default=5432, alias='POSTGRES_PORT')
+    postgres_database: str = Field(default="steam_analyzer", alias='POSTGRES_DATABASE')
+    postgres_user: str = Field(default="", alias='POSTGRES_USER')
+    postgres_password: str = Field(default="", alias='POSTGRES_PASSWORD')
+
+    # Friends list configuration
+    max_friends_per_profile: int = 50
+    
+    # Processing limits
+    max_profiles_to_process: int = Field(default=100, alias='MAX_PROFILES_TO_PROCESS')  # 0 = unlimited
+    max_processing_time_minutes: int = Field(default=5, alias='MAX_PROCESSING_TIME_MINUTES')  # 0 = unlimited
 
     # Hate terms list (example - should be expanded)
     hate_terms: List[str] = [
         # Keywords - Add your own terms here
-        "boop",
-        "offensive_phrase",
-        # Unicode characters/emoticons
-        "🚫", "⛔",
+        "libs", "liberals", "libtard", "libtards", "libtardism", "libtardist", "libtardists", "tard", "tards", "retard", "retards", "ret4rd", "ret4rds"
     ]
     
     # Regex patterns for more complex matching (separate from simple terms)
-    hate_regex_patterns: List[str] = [
-        r"\b(pattern1|pattern2)\b",
-    ]
+    hate_regex_patterns: List[str] = []
     
     # Compiled regex patterns (initialized at runtime)
     _compiled_patterns: List[Pattern] = []
@@ -40,8 +57,24 @@ class Config(BaseSettings):
 
     # Target URLs to analyze
     target_urls: List[str] = [
-        "https://steamcommunity.com/profiles/76561198056686440"
+        "https://steamcommunity.com/id/14Maverick"
     ]
+
+    @validator('max_concurrent_requests')
+    def validate_concurrent_requests(cls, v):
+        if v < 1:
+            raise ValueError('Max concurrent requests must be at least 1')
+        if v > 200:
+            raise ValueError('Max concurrent requests should not exceed 200')
+        return v
+
+    @validator('connection_pool_size')
+    def validate_connection_pool(cls, v, values):
+        max_concurrent = values.get('max_concurrent_requests', 50)
+        if v < max_concurrent:
+            # Pool should be at least as large as concurrent requests
+            return max_concurrent * 2
+        return v
 
     @validator('request_delay')
     def validate_request_delay(cls, v):
@@ -61,6 +94,18 @@ class Config(BaseSettings):
         if v.upper() not in valid_levels:
             raise ValueError(f'Log level must be one of: {", ".join(valid_levels)}')
         return v.upper()
+
+    @validator('max_profiles_to_process')
+    def validate_max_profiles(cls, v):
+        if v < 0:
+            raise ValueError('Max profiles to process must be non-negative (0 = unlimited)')
+        return v
+
+    @validator('max_processing_time_minutes')
+    def validate_max_processing_time(cls, v):
+        if v < 0:
+            raise ValueError('Max processing time must be non-negative (0 = unlimited)')
+        return v
 
     class Config:
         env_file = ".env"

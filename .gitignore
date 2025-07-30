@@ -11,12 +11,16 @@ __pycache__/
 # Virtual environment
 .venv/
 venv/
+env/
+ENV/
 
 # Claude cache
 .claude/
 
 # Output files
 output/
+*.png
+*.log
 
 # Python init files in src
 src/__init__.py
@@ -24,3 +28,49 @@ src/__init__.py
 # Environment variables
 .env
 .env.local
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files
+test_*.py
+*.test.py
+debug_*.html
+
+# JSON data files
+*.json
+
+# Node.js (for frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Frontend build files
+frontend/dist/
+frontend/build/
+frontend/.next/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Jupyter notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
