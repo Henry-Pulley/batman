@@ -53,6 +53,30 @@
         fill: #ffd700;
       }
 
+      .batman-logo svg ellipse {
+        transition: fill 0.3s ease;
+      }
+
+      .batman-logo svg path {
+        transition: fill 0.3s ease;
+      }
+
+      .batman-logo svg rect {
+        transition: fill 0.3s ease;
+      }
+
+      .batman-logo:hover svg ellipse {
+        fill: #ffffff;
+      }
+
+      .batman-logo:hover svg path {
+        fill: #ff0000;
+      }
+
+      .batman-logo:hover svg rect {
+        fill: #ff0000;
+      }
+
       /* Input Section */
       .input-section {
         padding: 20px;
@@ -98,7 +122,7 @@
 
       .crawl-button {
         background: transparent;
-        color: #ffd700;
+        color: white;
         border: none;
         padding: 16px 32px;
         font-size: 14px;
@@ -109,24 +133,12 @@
         position: relative;
       }
 
-      .crawl-button::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 0;
-        height: 2px;
-        background-color: #ffd700;
-        transition: width 0.3s ease;
-      }
-
-      .crawl-button:hover::after {
-        width: 100%;
-      }
 
       .crawl-button:hover {
+        color: #ffd700;
         transform: translateY(-2px);
       }
+
 
       /* Crawl Summary Section */
       .crawl-summary-section {
@@ -211,15 +223,6 @@
         color: #ffd700;
       }
 
-      .tab.active::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background-color: #ffd700;
-      }
 
       /* Tab Content */
       .tab-content {
@@ -281,7 +284,7 @@
 
       .search-button {
         background-color: transparent;
-        color: #ffd700;
+        color: white;
         border: none;
         padding: 16px 32px;
         font-size: 14px;
@@ -291,33 +294,31 @@
         position: relative;
       }
 
-      .search-button::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 0;
-        height: 2px;
-        background-color: #ffd700;
-        transition: width 0.3s ease;
+
+      .search-button:hover {
+        color: #ffd700;
+        transform: translateY(-2px);
       }
 
-      .search-button:hover::after {
-        width: 100%;
-      }
 
       /* Tab-specific search control layouts */
       #flagged-comments .search-controls {
         grid-template-columns: 1fr auto auto auto;
       }
 
-      #villains .search-controls,
+      #villains .search-controls {
+        grid-template-columns: 1fr auto auto auto;
+      }
+
       #further-monitoring .search-controls,
       #unprocessed-profiles .search-controls {
         grid-template-columns: 1fr auto auto;
       }
 
-      #villains .search-controls .search-button,
+      #villains .search-controls .search-button {
+        grid-column: 4;
+      }
+
       #further-monitoring .search-controls .search-button,
       #unprocessed-profiles .search-controls .search-button {
         grid-column: 3;
@@ -342,7 +343,7 @@
       }
 
       .flagged-comments-header {
-        grid-template-columns: 150px 200px 1fr 120px 100px;
+        grid-template-columns: 200px 200px 1fr 120px 100px;
       }
 
       .flagged-comments-header > div:nth-child(3),
@@ -368,7 +369,7 @@
       }
 
       .flagged-comments-row {
-        grid-template-columns: 150px 200px 1fr 120px 100px;
+        grid-template-columns: 200px 200px 1fr 120px 100px;
       }
 
       .villains-row {
@@ -507,10 +508,28 @@
 
       .monitor-button .icon {
         color: #666;
+        transition: all 0.3s ease;
       }
 
       .monitor-button:hover .icon {
         color: #fff;
+      }
+
+      /* Eye animation styles */
+      .eye-closed {
+        display: block;
+      }
+
+      .eye-open {
+        display: none;
+      }
+
+      .monitor-button:hover .eye-closed {
+        display: none;
+      }
+
+      .monitor-button:hover .eye-open {
+        display: block;
       }
 
       .confirm-button {
@@ -529,6 +548,25 @@
       }
 
       .confirm-button:hover .icon {
+        color: #fff;
+      }
+
+      .remove-button {
+        background-color: rgba(255, 152, 0, 0.1);
+        border: 1px solid rgba(255, 152, 0, 0.3);
+      }
+
+      .remove-button:hover {
+        background-color: #ff9800;
+        border-color: #ff9800;
+        box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+      }
+
+      .remove-button .icon {
+        color: #ff9800;
+      }
+
+      .remove-button:hover .icon {
         color: #fff;
       }
 
@@ -733,10 +771,13 @@
                   class="action-button monitor-button"
                   title="Add to monitoring"
                 >
-                  <svg class="icon" viewBox="0 0 24 24">
-                    <path
-                      d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
-                    />
+                  <svg class="icon eye-closed" viewBox="0 0 24 24">
+                    <path d="M12 14c1.66 0 3-1.34 3-3 0-1.66-1.34-3-3-3s-3 1.34-3 3c0 1.66 1.34 3 3 3z"/>
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <path d="M1 1l22 22" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                  <svg class="icon eye-open" viewBox="0 0 24 24">
+                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
                   </svg>
                 </button>
               </div>
@@ -753,6 +794,10 @@
               class="search-input"
               placeholder="Search by SteamID or Known Aliases..."
             />
+            <select class="filter-select" id="villains-sort-select">
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+            </select>
             <select class="filter-select" id="villains-time-filter">
               <option>All Time</option>
               <option>Past 1 Hour</option>
@@ -1134,14 +1179,19 @@
                                 data-commentid="${comment.id}"
                                 title="Report">
                             <svg class="icon" viewBox="0 0 24 24">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                             </svg>
                         </button>
                         <button class="action-button monitor-button"
                                 data-steamid="${comment.commenter_steamid}"
                                 data-alias="${comment.commenter_alias}"
                                 title="Add to monitoring">
-                            <svg class="icon" viewBox="0 0 24 24">
+                            <svg class="icon eye-closed" viewBox="0 0 24 24">
+                                <path d="M12 14c1.66 0 3-1.34 3-3 0-1.66-1.34-3-3-3s-3 1.34-3 3c0 1.66 1.34 3 3 3z"/>
+                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" fill="none" stroke="currentColor" stroke-width="2"/>
+                                <path d="M1 1l22 22" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            <svg class="icon eye-open" viewBox="0 0 24 24">
                                 <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
                             </svg>
                         </button>
@@ -1187,8 +1237,29 @@
               });
 
               if (response.ok) {
-                alert("Profile reported successfully");
-                loadCurrentTab(); // Refresh data
+                const result = await response.json();
+                if (result.duplicate) {
+                  if (confirm(result.message + " Would you like to add it anyways?")) {
+                    // Make another request with force flag
+                    const forceResponse = await fetch(`${API_BASE}/report`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        steam_id: steamId,
+                        alias: alias,
+                        comment_id: commentId,
+                        force: true,
+                      }),
+                    });
+                    if (forceResponse.ok) {
+                      alert("Profile reported successfully");
+                      loadCurrentTab();
+                    }
+                  }
+                } else {
+                  alert(result.message || "Profile reported successfully");
+                  loadCurrentTab();
+                }
               }
             } catch (error) {
               console.error("Report failed:", error);
@@ -1270,6 +1341,45 @@
             }
           });
         });
+
+        // Remove from monitoring buttons
+        document.querySelectorAll(".remove-button").forEach((button) => {
+          const row = button.closest(".table-row");
+
+          button.addEventListener("mouseenter", () => {
+            row.classList.add("hover-monitor");
+          });
+
+          button.addEventListener("mouseleave", () => {
+            row.classList.remove("hover-monitor");
+          });
+
+          button.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            const steamId = button.dataset.steamid;
+            const alias = button.dataset.alias;
+            const profileId = button.dataset.profileid;
+
+            try {
+              const response = await fetch(`${API_BASE}/remove-monitoring`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  steam_id: steamId,
+                  alias: alias,
+                  profile_id: profileId,
+                }),
+              });
+
+              if (response.ok) {
+                alert("Removed from monitoring");
+                loadCurrentTab(); // Refresh the data
+              }
+            } catch (error) {
+              console.error("Remove from monitoring failed:", error);
+            }
+          });
+        });
       }
 
       // Attach click handlers to Steam ID elements
@@ -1325,6 +1435,12 @@
         });
 
       document
+        .querySelector("#villains-sort-select")
+        .addEventListener("change", () => {
+          loadVillains();
+        });
+
+      document
         .querySelector("#villains-time-filter")
         .addEventListener("change", () => {
           loadVillains();
@@ -1357,12 +1473,14 @@
       // Load villains
       async function loadVillains() {
         const searchInput = document.querySelector("#villains .search-input");
+        const sortSelect = document.querySelector("#villains-sort-select");
         const timeFilterSelect = document.querySelector(
           "#villains-time-filter"
         );
 
         const params = new URLSearchParams({
           search: searchInput ? searchInput.value : "",
+          sort: sortSelect ? sortSelect.value : "newest",
           time_filter: timeFilterSelect
             ? getTimeFilterValue(timeFilterSelect.value)
             : "all",
@@ -1397,19 +1515,47 @@
           return;
         }
 
-        villains.forEach((villain) => {
+        // Sort villains client-side based on selected option
+        const sortSelect = document.querySelector("#villains-sort-select");
+        const sortOption = sortSelect ? sortSelect.value : "newest";
+
+        const sortedVillains = [...villains].sort((a, b) => {
+          const dateA = a.first_seen ? new Date(a.first_seen) : new Date(0);
+          const dateB = b.first_seen ? new Date(b.first_seen) : new Date(0);
+
+          if (sortOption === "oldest") {
+            return dateA - dateB; // oldest first
+          } else {
+            return dateB - dateA; // newest first (default)
+          }
+        });
+
+        sortedVillains.forEach((villain) => {
           const row = document.createElement("div");
           row.className = "table-row villains-row";
           row.innerHTML = `
                     <div class="steam-id" data-steamid="${villain.steam_id}">${villain.steam_id}</div>
                     <div>${villain.aliases}</div>
-                    <div class="timestamp">${formatDate(new Date())}</div>
+                    <div class="timestamp">${villain.first_seen ? formatDate(villain.first_seen) : '<div>Unknown</div><div></div>'}</div>
                     <div class="actions">
+                        <button class="action-button report-button" 
+                                data-steamid="${villain.steam_id}"
+                                data-alias="${villain.aliases}"
+                                title="Report">
+                            <svg class="icon" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                            </svg>
+                        </button>
                         <button class="action-button monitor-button"
                                 data-steamid="${villain.steam_id}"
                                 data-alias="${villain.aliases}"
                                 title="Add to monitoring">
-                            <svg class="icon" viewBox="0 0 24 24">
+                            <svg class="icon eye-closed" viewBox="0 0 24 24">
+                                <path d="M12 14c1.66 0 3-1.34 3-3 0-1.66-1.34-3-3-3s-3 1.34-3 3c0 1.66 1.34 3 3 3z"/>
+                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" fill="none" stroke="currentColor" stroke-width="2"/>
+                                <path d="M1 1l22 22" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            <svg class="icon eye-open" viewBox="0 0 24 24">
                                 <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
                             </svg>
                         </button>
@@ -1580,7 +1726,12 @@
                                 data-steamid="${profile.steam_id}"
                                 data-alias="${profile.alias}"
                                 title="Add to monitoring">
-                            <svg class="icon" viewBox="0 0 24 24">
+                            <svg class="icon eye-closed" viewBox="0 0 24 24">
+                                <path d="M12 14c1.66 0 3-1.34 3-3 0-1.66-1.34-3-3-3s-3 1.34-3 3c0 1.66 1.34 3 3 3z"/>
+                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" fill="none" stroke="currentColor" stroke-width="2"/>
+                                <path d="M1 1l22 22" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            <svg class="icon eye-open" viewBox="0 0 24 24">
                                 <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
                             </svg>
                         </button>
@@ -1608,18 +1759,19 @@
 
         if (profiles.length > 0) {
           container.innerHTML = `
-            <div class="table-header" style="grid-template-columns: 200px 200px 1fr 100px;">
+            <div class="table-header" style="grid-template-columns: 200px 200px 1fr 100px 100px;">
               <div>Steam ID</div>
               <div>Known Aliases</div>
               <div>Date Added</div>
               <div>Checked</div>
+              <div>Actions</div>
             </div>
           `;
 
           profiles.forEach((profile) => {
             const row = document.createElement("div");
             row.className = "table-row";
-            row.style.gridTemplateColumns = "200px 200px 1fr 100px";
+            row.style.gridTemplateColumns = "200px 200px 1fr 100px 100px";
             row.innerHTML = `
                       <div class="steam-id" data-steamid="${profile.steam_id}">${profile.steam_id}</div>
                       <div>${profile.alias}</div>
@@ -1631,10 +1783,22 @@
                           ? formatDate(profile.last_checked)
                           : "Never"
                       }</div>
+                      <div class="actions">
+                          <button class="action-button remove-button"
+                                  data-steamid="${profile.steam_id}"
+                                  data-alias="${profile.alias}"
+                                  data-profileid="${profile.id || ''}"
+                                  title="Remove from monitoring">
+                              <svg class="icon" viewBox="0 0 24 24">
+                                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                              </svg>
+                          </button>
+                      </div>
                   `;
             container.appendChild(row);
           });
 
+          attachActionListeners();
           attachSteamIdClickHandlers();
         }
       }
