@@ -285,6 +285,30 @@ def remove_from_monitoring():
     
     return jsonify({"message": "Removed from monitoring successfully"})
 
+@app.route('/api/update-notes', methods=['POST'])
+def update_user_notes():
+    data = request.json
+    steam_id = data.get('steam_id')
+    user_notes = data.get('user_notes', '')
+    
+    if not steam_id:
+        return jsonify({"error": "steam_id is required"}), 400
+    
+    with PostgresDatabase() as db:
+        # Update user_notes in further_monitoring table
+        db.cursor.execute("""
+            UPDATE further_monitoring 
+            SET user_notes = %s
+            WHERE steam_id = %s
+        """, (user_notes, steam_id))
+        db.conn.commit()
+        
+        # Check if any rows were updated
+        if db.cursor.rowcount == 0:
+            return jsonify({"error": "Profile not found in monitoring list"}), 404
+    
+    return jsonify({"message": "User notes updated successfully"})
+
 @app.route('/api/confirm-report', methods=['POST'])
 def confirm_report():
     data = request.json
