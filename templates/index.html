@@ -570,6 +570,25 @@
         color: #fff;
       }
 
+      .edit-button {
+        background-color: rgba(255, 215, 0, 0.1);
+        border: 1px solid rgba(255, 215, 0, 0.3);
+      }
+
+      .edit-button:hover {
+        background-color: #ffd700;
+        border-color: #ffd700;
+        box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+      }
+
+      .edit-button .icon {
+        color: #ffd700;
+      }
+
+      .edit-button:hover .icon {
+        color: #000;
+      }
+
       /* Empty State */
       .empty-state {
         text-align: center;
@@ -624,6 +643,23 @@
 
       .steam-id:hover {
         color: #9c27b0;
+      }
+
+      /* User Notes column styling */
+      .user-notes {
+        color: #ffd700;
+        transition: all 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
+      }
+
+      .table-header .user-notes-header {
+        color: #ffd700;
+      }
+
+      /* Edit button hover effect on user notes */
+      .table-row.hover-edit .user-notes {
+        color: #ffd700;
+        transform: translateX(8px) scale(1.05);
+        text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
       }
     </style>
   </head>
@@ -726,8 +762,8 @@
               placeholder="Search by SteamID or Known Aliases..."
             />
             <select class="filter-select" id="sort-select">
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
             </select>
             <select class="filter-select" id="time-filter-select">
               <option>All Time</option>
@@ -795,8 +831,8 @@
               placeholder="Search by SteamID or Known Aliases..."
             />
             <select class="filter-select" id="villains-sort-select">
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
             </select>
             <select class="filter-select" id="villains-time-filter">
               <option>All Time</option>
@@ -1380,6 +1416,55 @@
             }
           });
         });
+
+        // Edit user notes buttons
+        document.querySelectorAll(".edit-button").forEach((button) => {
+          const row = button.closest(".table-row");
+
+          button.addEventListener("mouseenter", () => {
+            row.classList.add("hover-edit");
+          });
+
+          button.addEventListener("mouseleave", () => {
+            row.classList.remove("hover-edit");
+          });
+
+          button.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            const steamId = button.dataset.steamid;
+            const alias = button.dataset.alias;
+            const profileId = button.dataset.profileid;
+            const currentNotes = button.dataset.notes;
+
+            // Prompt user for new notes
+            const newNotes = prompt("Edit user notes:", currentNotes);
+            
+            if (newNotes !== null) {  // User didn't cancel
+              try {
+                const response = await fetch(`${API_BASE}/update-notes`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    steam_id: steamId,
+                    alias: alias,
+                    profile_id: profileId,
+                    user_notes: newNotes,
+                  }),
+                });
+
+                if (response.ok) {
+                  alert("User notes updated successfully");
+                  loadCurrentTab(); // Refresh the data
+                } else {
+                  alert("Failed to update user notes");
+                }
+              } catch (error) {
+                console.error("Update notes failed:", error);
+                alert("Failed to update user notes");
+              }
+            }
+          });
+        });
       }
 
       // Attach click handlers to Steam ID elements
@@ -1664,7 +1749,7 @@
         const mapping = {
           "All Statuses": "all",
           "Pending Manual Review": "pending manual review",
-          "Report Submitted": "submitted",
+          "Report Submitted": "report submitted",
         };
         return mapping[dropdownValue] || "all";
       }
@@ -1759,9 +1844,10 @@
 
         if (profiles.length > 0) {
           container.innerHTML = `
-            <div class="table-header" style="grid-template-columns: 200px 200px 1fr 100px 100px;">
+            <div class="table-header" style="grid-template-columns: 200px 200px 200px 1fr 100px 100px;">
               <div>Steam ID</div>
               <div>Known Aliases</div>
+              <div class="user-notes-header">User Notes</div>
               <div>Date Added</div>
               <div>Checked</div>
               <div>Actions</div>
@@ -1771,10 +1857,11 @@
           profiles.forEach((profile) => {
             const row = document.createElement("div");
             row.className = "table-row";
-            row.style.gridTemplateColumns = "200px 200px 1fr 100px 100px";
+            row.style.gridTemplateColumns = "200px 200px 200px 1fr 100px 100px";
             row.innerHTML = `
                       <div class="steam-id" data-steamid="${profile.steam_id}">${profile.steam_id}</div>
                       <div>${profile.alias}</div>
+                      <div class="user-notes">${profile.user_notes || "No notes"}</div>
                       <div class="timestamp">${formatDate(
                         profile.added_date
                       )}</div>
@@ -1784,6 +1871,16 @@
                           : "Never"
                       }</div>
                       <div class="actions">
+                          <button class="action-button edit-button"
+                                  data-steamid="${profile.steam_id}"
+                                  data-alias="${profile.alias}"
+                                  data-profileid="${profile.id || ''}"
+                                  data-notes="${profile.user_notes || ''}"
+                                  title="Edit user notes">
+                              <svg class="icon" viewBox="0 0 24 24">
+                                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                              </svg>
+                          </button>
                           <button class="action-button remove-button"
                                   data-steamid="${profile.steam_id}"
                                   data-alias="${profile.alias}"

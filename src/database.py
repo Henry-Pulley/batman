@@ -94,7 +94,8 @@ class PostgresDatabase:
             steam_id VARCHAR(17) UNIQUE NOT NULL,
             alias VARCHAR(255) NOT NULL,
             added_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            last_checked TIMESTAMP
+            last_checked TIMESTAMP,
+            user_notes TEXT
         );
         """
         
@@ -123,6 +124,12 @@ class PostgresDatabase:
             self.cursor.execute(
                 "CREATE INDEX IF NOT EXISTS idx_monitoring_steamid ON further_monitoring(steam_id)"
             )
+            
+            # Add user_notes column to further_monitoring if it doesn't exist
+            self.cursor.execute("""
+                ALTER TABLE further_monitoring 
+                ADD COLUMN IF NOT EXISTS user_notes TEXT
+            """)
             
             self.conn.commit()
             logging.info("Database schema created successfully")
