@@ -35,6 +35,28 @@ python3 main.py https://steamcommunity.com/profiles/steamid64 # steamid64 are in
 
 **Note**: By default, the application uses the URLs specified in `src/config.py` under `target_urls`. You can add multiple URLs to analyze in that list, or pass a single URL as a command line argument to override the config.
 
+## Web UI
+
+### HTML
+
+The web UI is built using Flask and provides a simple interface to view flagged comments and manage reported profiles via the cumulative PostgreSQL database.
+
+HTML files are located in the `templates` directory.
+
+### Setup
+
+1. Install additional dependencies:
+
+   ```bash
+   pip3 install -r requirements.txt
+   ```
+
+2. Start the Flask server:
+
+   ```bash
+   python3 app.py
+   ```
+
 ## Architecture
 
 ### Core Components

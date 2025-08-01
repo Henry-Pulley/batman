@@ -195,6 +195,12 @@ async def process_profile_worker(queue, visited_ids, queued_ids, db, session, ra
             # Scrape comments
             comments = await scrape_profile_comments(current_steamid, session)
 
+        # DEBUG: Log comment scraping results
+        logging.info(f"Found {len(comments)} comments on profile {current_steamid}")
+        for i, comment in enumerate(comments[:3]):  # Show first 3 comments
+            comment_text = comment.get('comment_text', '')
+            logging.info(f"  Comment {i+1}: \"{comment_text[:100]}{'...' if len(comment_text) > 100 else ''}\"")
+
         # OPTIMIZED: Collect flagged comments for batch processing
         flagged_comments_batch = []
         villains_to_add = []
@@ -203,6 +209,8 @@ async def process_profile_worker(queue, visited_ids, queued_ids, db, session, ra
         # Process each comment
         for comment in comments:
             if check_for_hate_speech(comment['comment_text']):
+                logging.info(f"  HATE SPEECH DETECTED: \"{comment['comment_text'][:100]}{'...' if len(comment['comment_text']) > 100 else ''}\"")
+                logging.info(f"  Commenter: {comment.get('commenter_name', 'Unknown')} ({comment.get('commenter_url', 'No URL')})")
                 # Get commenter's SteamID
                 try:
                     async with rate_limiter:

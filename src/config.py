@@ -33,7 +33,7 @@ class Config(BaseSettings):
     postgres_password: str = Field(default="", alias='POSTGRES_PASSWORD')
 
     # Friends list configuration
-    max_friends_per_profile: int = 50
+    max_friends_per_profile: int = 1
     
     # Processing limits
     max_profiles_to_process: int = Field(default=100, alias='MAX_PROFILES_TO_PROCESS')  # 0 = unlimited
@@ -42,7 +42,7 @@ class Config(BaseSettings):
     # Hate terms list (example - should be expanded)
     hate_terms: List[str] = [
         # Keywords - Add your own terms here
-        "libs", "liberals", "libtard", "libtards", "libtardism", "libtardist", "libtardists", "tard", "tards", "retard", "retards", "ret4rd", "ret4rds"
+        "libs", "liberals", "libtard", "libtards", "libtardism", "libtardist", "libtardists", "tard", "tards", "retard", "retards", "ret4rd", "ret4rds", "bkah", "boop", "test"
     ]
     
     # Regex patterns for more complex matching (separate from simple terms)

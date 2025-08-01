@@ -16,7 +16,6 @@ from dotenv import load_dotenv
 from src.config import config, compile_hate_patterns
 from src.recursive_search import recursive_profile_search
 from src.validators import SafetyValidator
-from src.database_pool import DatabasePool
 from src.logging_config import LOGGING_CONFIG
 
 
