@@ -78,6 +78,24 @@ class PostgresDatabase:
             shutdown_reason VARCHAR(100) NOT NULL,
             UNIQUE(steam_id, friend_path)
         );
+
+        CREATE TABLE IF NOT EXISTS reported_profiles (
+            id SERIAL PRIMARY KEY,
+            steam_id VARCHAR(17) NOT NULL,
+            alias VARCHAR(255) NOT NULL,
+            comment_id INTEGER REFERENCES flagged_comments(id),
+            status VARCHAR(50) DEFAULT 'pending manual review',
+            screenshot_path TEXT,
+            reported_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS further_monitoring (
+            id SERIAL PRIMARY KEY,
+            steam_id VARCHAR(17) UNIQUE NOT NULL,
+            alias VARCHAR(255) NOT NULL,
+            added_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_checked TIMESTAMP
+        );
         """
         
         try:
@@ -95,6 +113,15 @@ class PostgresDatabase:
             )
             self.cursor.execute(
                 "CREATE INDEX IF NOT EXISTS idx_unprocessed_steamid ON unprocessed_profiles(steam_id)"
+            )
+            self.cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_reported_steamid ON reported_profiles(steam_id)"
+            )
+            self.cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_reported_comment_id ON reported_profiles(comment_id)"
+            )
+            self.cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_monitoring_steamid ON further_monitoring(steam_id)"
             )
             
             self.conn.commit()
