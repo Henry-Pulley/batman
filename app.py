@@ -199,12 +199,20 @@ def get_villains():
     time_filter = request.args.get('time_filter', 'all')
     
     with PostgresDatabase() as db:
-        query = "SELECT * FROM villains WHERE 1=1"
+        # Join with flagged_comments to get the earliest comment_scraped timestamp
+        query = """
+            SELECT v.*, MIN(fc.comment_scraped) as first_seen
+            FROM villains v
+            LEFT JOIN flagged_comments fc ON v.steam_id = fc.commenter_steamid
+            WHERE 1=1
+        """
         params = []
         
         if search_term:
-            query += " AND (steam_id LIKE %s OR aliases LIKE %s)"
+            query += " AND (v.steam_id LIKE %s OR v.aliases LIKE %s)"
             params.extend([f'%{search_term}%', f'%{search_term}%'])
+        
+        query += " GROUP BY v.id, v.steam_id, v.aliases ORDER BY first_seen DESC"
         
         db.cursor.execute(query, params)
         results = db.cursor.fetchall()
@@ -214,15 +222,32 @@ def get_villains():
 @app.route('/api/report', methods=['POST'])
 def report_profile():
     data = request.json
+    steam_id = data.get('steam_id')
+    alias = data.get('alias')
     comment_id = data.get('comment_id')
+    force = data.get('force', False)
     
     with PostgresDatabase() as db:
+        # Check if steam_id already exists in reported_profiles
+        if not force:
+            db.cursor.execute("""
+                SELECT COUNT(*) as count FROM reported_profiles 
+                WHERE steam_id = %s
+            """, (steam_id,))
+            result = db.cursor.fetchone()
+            if result and result['count'] > 0:
+                return jsonify({
+                    "duplicate": True,
+                    "message": f"Steam ID {steam_id} already exists in the reported profiles table."
+                })
+        
         # Add to reported_profiles table
+        # comment_id can be NULL for entries from villains tab
         db.cursor.execute("""
             INSERT INTO reported_profiles 
             (steam_id, alias, comment_id, status, screenshot_path)
             VALUES (%s, %s, %s, 'pending manual review', %s)
-        """, (data['steam_id'], data['alias'], comment_id, ''))
+        """, (steam_id, alias, comment_id, ''))
         db.conn.commit()
     
     return jsonify({"message": "Profile reported successfully"})
@@ -240,6 +265,25 @@ def add_to_monitoring():
         db.conn.commit()
     
     return jsonify({"message": "Added to monitoring"})
+
+@app.route('/api/remove-monitoring', methods=['POST'])
+def remove_from_monitoring():
+    data = request.json
+    steam_id = data.get('steam_id')
+    
+    with PostgresDatabase() as db:
+        # Remove from further_monitoring table
+        db.cursor.execute("""
+            DELETE FROM further_monitoring 
+            WHERE steam_id = %s
+        """, (steam_id,))
+        db.conn.commit()
+        
+        # Check if any rows were deleted
+        if db.cursor.rowcount == 0:
+            return jsonify({"error": "Profile not found in monitoring list"}), 404
+    
+    return jsonify({"message": "Removed from monitoring successfully"})
 
 @app.route('/api/confirm-report', methods=['POST'])
 def confirm_report():
@@ -269,7 +313,7 @@ def get_reported_profiles():
     
     with PostgresDatabase() as db:
         query = """
-            SELECT rp.*, fc.comment_text 
+            SELECT rp.*, COALESCE(fc.comment_text, 'N/A') as comment_text 
             FROM reported_profiles rp 
             LEFT JOIN flagged_comments fc ON rp.comment_id = fc.id 
             WHERE 1=1
