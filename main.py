@@ -17,6 +17,7 @@ from src.config import config, compile_hate_patterns
 from src.recursive_search import recursive_profile_search
 from src.validators import SafetyValidator
 from src.logging_config import LOGGING_CONFIG
+from src.database import cleanup_database_pool
 
 
 # Load environment variables from .env file
@@ -28,9 +29,10 @@ validator = SafetyValidator()
 def signal_handler(signum, frame):
     """Handle shutdown signals gracefully"""
     print("\nShutting down gracefully...")
-    # Close database connections
-    if hasattr(DatabasePool, 'db_pool'):
-        DatabasePool.db_pool.close_all()
+    
+    # Close database pool
+    cleanup_database_pool()
+    
     sys.exit(0)
 
 
