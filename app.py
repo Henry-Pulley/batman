@@ -239,7 +239,7 @@ def report_profile():
             if result and result['count'] > 0:
                 return jsonify({
                     "duplicate": True,
-                    "message": f"Steam ID {steam_id} already exists in the reported profiles table."
+                    "message": f"Steam ID {steam_id} already exists in the report center."
                 })
         
         # Add to reported_profiles table

@@ -39,7 +39,7 @@ python3 main.py https://steamcommunity.com/profiles/steamid64 # steamid64 are in
 
 ### HTML
 
-The web UI is built using Flask and provides a simple interface to view flagged comments and manage reported profiles via the cumulative PostgreSQL database.
+The web UI is built using Flask and provides a simple interface to view flagged comments and manage the report center via the cumulative PostgreSQL database.
 
 HTML files are located in the `templates` directory.
 
