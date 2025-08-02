@@ -99,7 +99,8 @@ class DatabasePool:
                     comment_id INTEGER REFERENCES flagged_comments(id),
                     status VARCHAR(50) DEFAULT 'pending manual review',
                     screenshot_path TEXT,
-                    reported_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    reported_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    submitted_date TIMESTAMP
                 );
 
                 CREATE TABLE IF NOT EXISTS further_monitoring (
@@ -110,6 +111,9 @@ class DatabasePool:
                     last_checked TIMESTAMP,
                     user_notes TEXT
                 );
+
+                -- Add submitted_date column if it doesn't exist (migration)
+                ALTER TABLE reported_profiles ADD COLUMN IF NOT EXISTS submitted_date TIMESTAMP;
 
                 -- Create indexes for better performance
                 CREATE INDEX IF NOT EXISTS idx_commenter_steamid ON flagged_comments(commenter_steamid);

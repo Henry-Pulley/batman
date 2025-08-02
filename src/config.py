@@ -42,7 +42,7 @@ class Config(BaseSettings):
     # Hate terms list (example - should be expanded)
     hate_terms: List[str] = [
         # Keywords - Add your own terms here
-        "libs", "liberals", "libtard", "libtards", "libtardism", "libtardist", "libtardists", "tard", "tards", "retard", "retards", "ret4rd", "ret4rds", "bkah", "boop", "test"
+        "libs", "liberals", "libtard", "libtards", "libtardism", "libtardist", "libtardists", "tard", "tards", "retard", "retards", "ret4rd", "ret4rds", "bkah", "boop"
     ]
     
     # Regex patterns for more complex matching (separate from simple terms)

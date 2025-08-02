@@ -5,6 +5,7 @@ import asyncio
 from src.database import PostgresDatabase
 from src.recursive_search import recursive_profile_search
 from src.config import config
+from src.config_manager import ConfigManager
 from main import process_urls
 import threading
 
@@ -313,14 +314,15 @@ def update_user_notes():
 def confirm_report():
     data = request.json
     steam_id = data.get('steam_id')
+    submitted_date = data.get('submitted_date')
     
     with PostgresDatabase() as db:
-        # Update status from 'pending manual review' to 'report submitted'
+        # Update status from 'pending manual review' to 'report submitted' and set submitted_date
         db.cursor.execute("""
             UPDATE reported_profiles 
-            SET status = 'report submitted'
+            SET status = 'report submitted', submitted_date = %s
             WHERE steam_id = %s AND status = 'pending manual review'
-        """, (steam_id,))
+        """, (submitted_date, steam_id))
         db.conn.commit()
         
         # Check if any rows were updated
@@ -432,6 +434,65 @@ def get_unprocessed_profiles():
         results = db.cursor.fetchall()
         
     return jsonify(results)
+
+# Hate Terms Management Endpoints
+@app.route('/api/hate-terms', methods=['GET'])
+def get_hate_terms():
+    """Get all hate terms from config"""
+    try:
+        config_manager = ConfigManager()
+        terms = config_manager.get_hate_terms()
+        return jsonify({"terms": terms})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/hate-terms', methods=['POST'])
+def add_hate_term():
+    """Add a new hate term to config"""
+    data = request.json
+    term = data.get('term', '').strip()
+    
+    if not term:
+        return jsonify({"error": "Term cannot be empty"}), 400
+    
+    try:
+        config_manager = ConfigManager()
+        success, message = config_manager.add_hate_term(term)
+        
+        if success:
+            # Reload the config to apply changes
+            from importlib import reload
+            from src import config as config_module
+            reload(config_module)
+            # Also reload the global config instance
+            from src.config import config, compile_hate_patterns
+            compile_hate_patterns()
+            return jsonify({"message": message, "term": term})
+        else:
+            return jsonify({"error": message}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/hate-terms/<term>', methods=['DELETE'])
+def remove_hate_term(term):
+    """Remove a hate term from config"""
+    try:
+        config_manager = ConfigManager()
+        success, message = config_manager.remove_hate_term(term)
+        
+        if success:
+            # Reload the config to apply changes
+            from importlib import reload
+            from src import config as config_module
+            reload(config_module)
+            # Also reload the global config instance
+            from src.config import config, compile_hate_patterns
+            compile_hate_patterns()
+            return jsonify({"message": message})
+        else:
+            return jsonify({"error": message}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
