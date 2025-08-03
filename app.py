@@ -8,9 +8,35 @@ from src.config import config
 from src.config_manager import ConfigManager
 from main import process_urls
 import threading
+import json
+from datetime import datetime
+import pytz
+
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            # If the datetime is timezone-aware, keep it in its timezone
+            # If not, assume it's in the database timezone (America/New_York)
+            if obj.tzinfo is None:
+                eastern = pytz.timezone('America/New_York')
+                obj = eastern.localize(obj)
+            # Convert to ISO format which JavaScript can parse correctly
+            return obj.isoformat()
+        return super().default(obj)
 
 app = Flask(__name__)
 CORS(app)
+
+# Configure JSON handling for newer Flask versions
+app.json.ensure_ascii = False
+app.json.sort_keys = False
+
+def custom_jsonify(data):
+    """Custom jsonify that handles datetime objects properly"""
+    return app.response_class(
+        json.dumps(data, cls=DateTimeEncoder, ensure_ascii=False),
+        mimetype='application/json'
+    )
 
 # Global queue for background tasks
 crawl_status = {"active": False, "progress": 0, "total": 0}
@@ -200,9 +226,10 @@ def get_villains():
     time_filter = request.args.get('time_filter', 'all')
     
     with PostgresDatabase() as db:
-        # Join with flagged_comments to get the earliest comment_scraped timestamp
+        # Use date_added for manually added villains, fall back to earliest comment for others
         query = """
-            SELECT v.*, MIN(fc.comment_scraped) as first_seen
+            SELECT v.*, 
+                   COALESCE(v.date_added, MIN(fc.comment_scraped)) as first_seen
             FROM villains v
             LEFT JOIN flagged_comments fc ON v.steam_id = fc.commenter_steamid
             WHERE 1=1
@@ -213,12 +240,12 @@ def get_villains():
             query += " AND (v.steam_id LIKE %s OR v.aliases LIKE %s)"
             params.extend([f'%{search_term}%', f'%{search_term}%'])
         
-        query += " GROUP BY v.id, v.steam_id, v.aliases ORDER BY first_seen DESC"
+        query += " GROUP BY v.id, v.steam_id, v.aliases, v.user_notes, v.date_added ORDER BY first_seen DESC"
         
         db.cursor.execute(query, params)
         results = db.cursor.fetchall()
         
-    return jsonify(results)
+    return custom_jsonify(results)
 
 @app.route('/api/report', methods=['POST'])
 def report_profile():
@@ -296,19 +323,33 @@ def update_user_notes():
         return jsonify({"error": "steam_id is required"}), 400
     
     with PostgresDatabase() as db:
-        # Update user_notes in further_monitoring table
+        # Update user_notes in villains table (this should always exist)
+        db.cursor.execute("""
+            UPDATE villains 
+            SET user_notes = %s
+            WHERE steam_id = %s
+        """, (user_notes, steam_id))
+        villains_updated = db.cursor.rowcount
+        
+        # Update user_notes in further_monitoring table (may or may not exist)
         db.cursor.execute("""
             UPDATE further_monitoring 
             SET user_notes = %s
             WHERE steam_id = %s
         """, (user_notes, steam_id))
+        monitoring_updated = db.cursor.rowcount
+        
         db.conn.commit()
         
-        # Check if any rows were updated
-        if db.cursor.rowcount == 0:
-            return jsonify({"error": "Profile not found in monitoring list"}), 404
+        # Check if at least the villains table was updated
+        if villains_updated == 0:
+            return jsonify({"error": "Profile not found in villains list"}), 404
     
-    return jsonify({"message": "User notes updated successfully"})
+    return jsonify({
+        "message": "User notes updated successfully",
+        "villains_updated": villains_updated,
+        "monitoring_updated": monitoring_updated
+    })
 
 @app.route('/api/confirm-report', methods=['POST'])
 def confirm_report():
@@ -393,7 +434,7 @@ def get_further_monitoring():
         db.cursor.execute(query, params)
         results = db.cursor.fetchall()
         
-    return jsonify(results)
+    return custom_jsonify(results)
 
 @app.route('/api/unprocessed-profiles', methods=['GET'])
 def get_unprocessed_profiles():
@@ -493,6 +534,87 @@ def remove_hate_term(term):
             return jsonify({"error": message}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/api/add-villain', methods=['POST'])
+def add_manual_villain():
+    """Add a villain manually using Steam ID or username"""
+    data = request.json
+    steam_input = data.get('steam_id', '').strip()
+    alias = data.get('alias', '').strip()
+    user_notes = data.get('user_notes', '').strip()
+    
+    if not steam_input:
+        return jsonify({"error": "Steam ID or username is required"}), 400
+    
+    try:
+        import aiohttp
+        from src.steam_api import resolve_vanity_url
+        
+        # Determine if input is already a SteamID64 or needs resolution
+        if steam_input.isdigit() and len(steam_input) == 17:
+            # Already a SteamID64
+            resolved_steam_id = steam_input
+        else:
+            # Need to resolve username to SteamID64
+            async def resolve_username():
+                timeout = aiohttp.ClientTimeout(total=10)
+                async with aiohttp.ClientSession(timeout=timeout) as session:
+                    return await resolve_vanity_url(steam_input, session)
+            
+            try:
+                resolved_steam_id = asyncio.run(resolve_username())
+            except ValueError as e:
+                return jsonify({"error": f"Could not resolve username '{steam_input}': {str(e)}"}), 400
+            except Exception as e:
+                return jsonify({"error": f"Steam API error: {str(e)}"}), 500
+        
+        # If no alias provided, use the original input as alias
+        if not alias:
+            alias = steam_input if not (steam_input.isdigit() and len(steam_input) == 17) else "Manual Entry"
+        
+        # Add to villains table
+        with PostgresDatabase() as db:
+            # Check if villain already exists
+            db.cursor.execute("""
+                SELECT COUNT(*) as count FROM villains 
+                WHERE steam_id = %s
+            """, (resolved_steam_id,))
+            result = db.cursor.fetchone()
+            
+            # Get current timestamp in the user's timezone (Eastern)
+            from datetime import datetime
+            import pytz
+            
+            # Create timestamp in Eastern timezone 
+            eastern = pytz.timezone('America/New_York')
+            current_time_eastern = datetime.now(eastern)
+            
+            if result and result['count'] > 0:
+                # Update existing villain
+                db.cursor.execute("""
+                    UPDATE villains 
+                    SET aliases = %s, user_notes = %s, date_added = %s
+                    WHERE steam_id = %s
+                """, (alias, user_notes, current_time_eastern, resolved_steam_id))
+                message = f"Updated existing villain: {resolved_steam_id}"
+            else:
+                # Insert new villain
+                db.cursor.execute("""
+                    INSERT INTO villains (steam_id, aliases, user_notes, date_added)
+                    VALUES (%s, %s, %s, %s)
+                """, (resolved_steam_id, alias, user_notes, current_time_eastern))
+                message = f"Added new villain: {resolved_steam_id}"
+            
+            db.conn.commit()
+        
+        return jsonify({
+            "message": message,
+            "steam_id": resolved_steam_id,
+            "alias": alias
+        })
+        
+    except Exception as e:
+        return jsonify({"error": f"Database error: {str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

@@ -24,7 +24,12 @@ def _retry_logic_generator(func_name: str, max_retries: int, base_delay: float,
         try:
             yield attempt, None  # Signal to try the function
             return  # Success - exit the generator
-        except retry_exceptions as e:
+        except Exception as e:
+            if not isinstance(e, retry_exceptions):
+                # Re-raise exceptions that are not in the retry list
+                logging.error(f"Function {func_name} failed with non-retryable error: {str(e)}")
+                raise e
+            
             last_exception = e
             
             if attempt == max_retries:
@@ -43,10 +48,6 @@ def _retry_logic_generator(func_name: str, max_retries: int, base_delay: float,
             )
             
             yield attempt, delay  # Signal to sleep before retry
-        except Exception as e:
-            # Re-raise exceptions that are not in the retry list
-            logging.error(f"Function {func_name} failed with non-retryable error: {str(e)}")
-            raise e
     
     # This should never be reached, but just in case
     if last_exception:

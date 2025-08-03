@@ -79,7 +79,8 @@ class DatabasePool:
                 CREATE TABLE IF NOT EXISTS villains (
                     id SERIAL PRIMARY KEY,
                     steam_id VARCHAR(17) UNIQUE NOT NULL,
-                    aliases TEXT NOT NULL
+                    aliases TEXT NOT NULL,
+                    user_notes TEXT
                 );
 
                 CREATE TABLE IF NOT EXISTS unprocessed_profiles (
@@ -114,6 +115,12 @@ class DatabasePool:
 
                 -- Add submitted_date column if it doesn't exist (migration)
                 ALTER TABLE reported_profiles ADD COLUMN IF NOT EXISTS submitted_date TIMESTAMP;
+                
+                -- Add user_notes column to villains table if it doesn't exist (migration)
+                ALTER TABLE villains ADD COLUMN IF NOT EXISTS user_notes TEXT;
+                
+                -- Add date_added column to villains table if it doesn't exist (migration)
+                ALTER TABLE villains ADD COLUMN IF NOT EXISTS date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
                 -- Create indexes for better performance
                 CREATE INDEX IF NOT EXISTS idx_commenter_steamid ON flagged_comments(commenter_steamid);

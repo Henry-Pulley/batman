@@ -50,14 +50,19 @@ async def resolve_vanity_url(vanity_name, session):
         "vanityurl": vanity_name
     }
 
+    # Debug logging
+    import logging
+    logging.info(f"Making request to {endpoint} with params: {{'key': '{'*' * len(params['key']) if params['key'] else 'EMPTY'}', 'vanityurl': '{params['vanityurl']}'}}")
+    
     try:
         async with session.get(endpoint, params=params) as response:
             if response.status != 200:
+                response_text = await response.text()
                 raise aiohttp.ClientResponseError(
                     request_info=response.request_info,
                     history=response.history,
                     status=response.status,
-                    message=f"Steam API returned status {response.status}"
+                    message=f"Steam API returned status {response.status}. Response: {response_text}"
                 )
             data = await response.json()
     except aiohttp.ClientConnectorError as e:
@@ -83,14 +88,19 @@ async def get_player_summary(steamid64, session):
         "steamids": steamid64
     }
 
+    # Debug logging
+    import logging
+    logging.info(f"Making request to {endpoint} with params: {{'key': '{'*' * len(params['key']) if params['key'] else 'EMPTY'}', 'steamids': '{params['steamids']}'}}")
+    
     try:
         async with session.get(endpoint, params=params) as response:
             if response.status != 200:
+                response_text = await response.text()
                 raise aiohttp.ClientResponseError(
                     request_info=response.request_info,
                     history=response.history,
                     status=response.status,
-                    message=f"Steam API returned status {response.status}"
+                    message=f"Steam API returned status {response.status}. Response: {response_text}"
                 )
             data = await response.json()
     except aiohttp.ClientConnectorError as e:
