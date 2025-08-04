@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from typing import Optional, List, Dict, Any
 import psycopg2
 from psycopg2 import pool
-from psycopg2.extras import RealDictCursor, execute_values
+from psycopg2.extras import RealDictCursor, execute_values, Json
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -98,7 +98,7 @@ class DatabasePool:
                     steam_id VARCHAR(17) NOT NULL,
                     alias VARCHAR(255) NOT NULL,
                     comment_id INTEGER REFERENCES flagged_comments(id),
-                    status VARCHAR(50) DEFAULT 'pending manual review',
+                    status VARCHAR(50) DEFAULT 'pending review',
                     screenshot_path TEXT,
                     reported_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     submitted_date TIMESTAMP
@@ -121,6 +121,15 @@ class DatabasePool:
                 
                 -- Add date_added column to villains table if it doesn't exist (migration)
                 ALTER TABLE villains ADD COLUMN IF NOT EXISTS date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+                
+                -- Add emoticons column to villains table if it doesn't exist (migration)
+                ALTER TABLE villains ADD COLUMN IF NOT EXISTS emoticons JSONB;
+                
+                -- Add profile_pictures column to villains table if it doesn't exist (migration)
+                ALTER TABLE villains ADD COLUMN IF NOT EXISTS profile_pictures TEXT;
+                
+                -- Add last_avatar_update column to villains table if it doesn't exist (migration)
+                ALTER TABLE villains ADD COLUMN IF NOT EXISTS last_avatar_update TIMESTAMP;
 
                 -- Create indexes for better performance
                 CREATE INDEX IF NOT EXISTS idx_commenter_steamid ON flagged_comments(commenter_steamid);
@@ -311,16 +320,27 @@ class PostgresDatabase:
             logging.error(f"Failed to get detailed flagged comments: {e}")
             return []
 
-    def insert_villain(self, steam_id, aliases):
+    def insert_villain(self, steam_id, aliases, emoticons=None, profile_pictures=None):
         """Insert or update a villain"""
         try:
             query = """
-            INSERT INTO villains (steam_id, aliases)
-            VALUES (%s, %s)
-            ON CONFLICT (steam_id) DO UPDATE SET aliases = EXCLUDED.aliases
+            INSERT INTO villains (steam_id, aliases, emoticons, profile_pictures, last_avatar_update)
+            VALUES (%s, %s, %s, %s, %s)
+            ON CONFLICT (steam_id) DO UPDATE SET 
+                aliases = EXCLUDED.aliases,
+                emoticons = EXCLUDED.emoticons,
+                profile_pictures = EXCLUDED.profile_pictures,
+                last_avatar_update = EXCLUDED.last_avatar_update
             RETURNING id
             """
-            self.cursor.execute(query, (steam_id, aliases))
+            # Convert emoticons list to JSON string for storage
+            emoticons_json = Json(emoticons) if emoticons else None
+            # Handle avatar update timestamp
+            avatar_timestamp = time.time() if profile_pictures else None
+            from datetime import datetime
+            avatar_datetime = datetime.fromtimestamp(avatar_timestamp) if avatar_timestamp else None
+            
+            self.cursor.execute(query, (steam_id, aliases, emoticons_json, profile_pictures, avatar_datetime))
 
             result = self.cursor.fetchone()
             self.conn.commit()

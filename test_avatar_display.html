@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avatar Data Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .villain-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .avatar-sizes {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .avatar-size {
+            text-align: center;
+        }
+        .avatar-size img {
+            border: 2px solid #ddd;
+            border-radius: 4px;
+        }
+        .profile-info {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+        .steam-id {
+            font-family: monospace;
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎭 Steam Avatar Data Test</h1>
+    <div id="content" class="loading">Loading avatar data...</div>
+
+    <script>
+        async function loadVillains() {
+            try {
+                const response = await fetch('http://127.0.0.1:5002/api/villains');
+                const villains = await response.json();
+                
+                const content = document.getElementById('content');
+                
+                // Filter villains that have avatar data
+                const villainsWithAvatars = villains.filter(v => v.avatar_data && Object.keys(v.avatar_data).length > 0);
+                
+                if (villainsWithAvatars.length === 0) {
+                    content.innerHTML = '<p>No villains found with avatar data.</p>';
+                    return;
+                }
+                
+                content.innerHTML = '';
+                
+                // Display first 5 villains with avatars
+                villainsWithAvatars.slice(0, 5).forEach(villain => {
+                    const card = document.createElement('div');
+                    card.className = 'villain-card';
+                    
+                    const avatarData = villain.avatar_data;
+                    
+                    card.innerHTML = `
+                        <h3>👤 ${avatarData.personaname || villain.aliases}</h3>
+                        <p><strong>Steam ID:</strong> <span class="steam-id">${villain.steam_id}</span></p>
+                        
+                        <div class="avatar-sizes">
+                            <div class="avatar-size">
+                                <div>Small (32x32)</div>
+                                <img src="${avatarData.avatar}" alt="Small avatar" width="32" height="32">
+                            </div>
+                            <div class="avatar-size">
+                                <div>Medium (64x64)</div>
+                                <img src="${avatarData.avatarmedium}" alt="Medium avatar" width="64" height="64">
+                            </div>
+                            <div class="avatar-size">
+                                <div>Full (184x184)</div>
+                                <img src="${avatarData.avatarfull}" alt="Full avatar" width="184" height="184">
+                            </div>
+                        </div>
+                        
+                        <div class="profile-info">
+                            <p><strong>Profile URL:</strong> <a href="${avatarData.profileurl}" target="_blank">${avatarData.profileurl}</a></p>
+                            <p><strong>Account Created:</strong> ${avatarData.timecreated ? new Date(avatarData.timecreated * 1000).toLocaleDateString() : 'Unknown'}</p>
+                            <p><strong>Profile Visibility:</strong> ${getVisibilityText(avatarData.communityvisibilitystate)}</p>
+                            <p><strong>Online Status:</strong> ${getOnlineStatusText(avatarData.personastate)}</p>
+                            <p><strong>Last Avatar Update:</strong> ${new Date(villain.last_avatar_update).toLocaleString()}</p>
+                        </div>
+                    `;
+                    
+                    content.appendChild(card);
+                });
+                
+            } catch (error) {
+                console.error('Error loading villains:', error);
+                document.getElementById('content').innerHTML = '<p>Error loading avatar data. Make sure the Flask app is running on port 5002.</p>';
+            }
+        }
+        
+        function getVisibilityText(state) {
+            switch (state) {
+                case 1: return 'Private';
+                case 2: return 'Friends Only';
+                case 3: return 'Public';
+                default: return 'Unknown';
+            }
+        }
+        
+        function getOnlineStatusText(state) {
+            switch (state) {
+                case 0: return 'Offline';
+                case 1: return 'Online';
+                case 2: return 'Busy';
+                case 3: return 'Away';
+                case 4: return 'Snooze';
+                case 5: return 'Looking to Trade';
+                case 6: return 'Looking to Play';
+                default: return 'Unknown';
+            }
+        }
+        
+        // Load data when page loads
+        loadVillains();
+    </script>
+</body>
+</html>

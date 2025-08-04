@@ -105,11 +105,16 @@
       }
 
       .url-input-wrapper {
-        flex: 1;
+        flex: 0 0 35%;
+      }
+      .search-terms-wrapper {
+        flex: 0 0 45%;
+        /* padding-left: 20px; */
+        display: flex;
       }
 
       .crawl-output-wrapper {
-        flex: 0.25;
+        flex: 0 0 20%;
         padding-left: 20px;
         text-align: left;
       }
@@ -157,51 +162,52 @@
         border: none;
         border-bottom: 1px solid #333;
         color: #e0e0e0;
-        padding: 12px 0;
-        resize: vertical;
-        min-height: 60px;
+        padding: 0;
+        height: 18vh;
         font-family: monospace;
         font-size: 14px;
+        resize: none;
+        transition: border-bottom-color 0.1s ease-in-out;
       }
 
       .url-textarea:focus {
         outline: none;
-        border-bottom-color: #ffd700;
+        border-bottom-color: #a0a0a0;
       }
 
-      .crawl-button {
-        background: transparent;
-        color: white;
-        border: none;
-        padding: 16px 32px;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        white-space: nowrap;
-        position: relative;
-      }
-
-      .crawl-button:hover {
+      /* Timer Styles */
+      .crawl-timer {
         color: #ffd700;
-        transform: translateY(-2px);
+        font-family: inherit; /* Use same font as parent h2 */
+        font-size: 0.9em; /* Much smaller than h2 (1.5em) */
+        font-weight: inherit; /* Use same weight as parent h2 */
+        margin-left: 15px;
+        margin-bottom: 16px; /* Match h2 bottom margin */
+        display: none;
+        align-items: baseline; /* Align baselines */
       }
 
-      /* Crawl Summary Section */
-      .crawl-summary-section {
-        position: absolute;
-        top: 163px;
-        left: 0;
-        right: 0;
-        padding: 12px 20px;
-        background-color: #000;
-        z-index: 10;
-        opacity: 0;
-        transition: opacity 0.5s ease-in-out;
+      .crawl-timer.show {
+        display: flex;
       }
 
-      .crawl-summary-section.show {
-        opacity: 1;
+      .crawl-status {
+        color: #ff6b6b;
+        margin-left: 10px;
+        margin-bottom: 16px; /* Match timer bottom margin */
+        font-weight: normal;
+        font-size: 0.9em; /* Match timer font size */
+        display: none;
+        align-items: baseline; /* Match timer baseline alignment */
+      }
+
+      .crawl-status.show {
+        display: inline;
+      }
+
+      .crawler-header {
+        display: flex;
+        align-items: center;
       }
 
       .summary-content {
@@ -290,7 +296,7 @@
       /* Search Controls */
       .search-controls {
         padding: 16px 0;
-        margin-bottom: 30px;
+        margin-bottom: 15px;
         display: grid;
         grid-template-columns: 1fr auto auto auto;
         gap: 16px;
@@ -308,9 +314,23 @@
         font-size: 14px;
       }
 
+      /* Tab-specific search input widths - 50% of container */
+      #flagged-comments .search-input,
+      #villains .search-input,
+      #further-monitoring .search-input,
+      #reported-profiles .search-input,
+      #unprocessed-profiles .search-input {
+        width: 50%;
+        min-width: 200px;
+      }
+
+      .search-input {
+        transition: border-bottom-color 0.1s ease-in-out;
+      }
+
       .search-input:focus {
         outline: none;
-        border-bottom-color: #ffd700;
+        border-bottom-color: #a0a0a0;
       }
 
       .filter-select {
@@ -321,11 +341,12 @@
         padding: 10px 0;
         font-size: 14px;
         cursor: pointer;
+        transition: border-bottom-color 0.1s ease-in-out;
       }
 
       .filter-select:focus {
         outline: none;
-        border-bottom-color: #ffd700;
+        border-bottom-color: #a0a0a0;
       }
 
       .search-button {
@@ -347,29 +368,116 @@
 
       /* Tab-specific search control layouts */
       #flagged-comments .search-controls {
-        grid-template-columns: 1fr auto auto auto;
+        grid-template-columns: 40px 250px 1fr 120px 120px 130px;
+        align-items: center;
+        gap: 8px;
+      }
+
+      #flagged-comments .search-controls .steamid-search {
+        grid-column: 2;
+        width: 100%;
+      }
+
+      #flagged-comments .search-controls .comment-search {
+        grid-column: 3;
+        width: 100%;
+      }
+
+      #flagged-comments .search-controls .filter-select:first-of-type {
+        grid-column: 4;
+        justify-self: stretch;
+        width: 100%;
+      }
+
+      #flagged-comments .search-controls .filter-select:last-of-type {
+        grid-column: 5;
+        justify-self: stretch;
+        width: 100%;
       }
 
       #villains .search-controls {
-        grid-template-columns: 1fr auto auto auto;
+        grid-template-columns: 40px 250px 1fr 120px 130px;
+        align-items: center;
+        gap: 8px;
       }
 
-      #further-monitoring .search-controls,
-      #unprocessed-profiles .search-controls {
-        grid-template-columns: 1fr auto auto;
+      #villains .search-controls .search-input {
+        grid-column: 2 / 4;
+        width: 100%;
       }
 
-      #villains .search-controls .search-button {
+      #villains .search-controls .filter-select:first-of-type {
         grid-column: 4;
+        justify-self: stretch;
+        width: 100%;
       }
 
-      #further-monitoring .search-controls .search-button,
-      #unprocessed-profiles .search-controls .search-button {
+      #villains .search-controls .filter-select:last-of-type {
+        grid-column: 5;
+        justify-self: stretch;
+        width: 100%;
+      }
+
+      #further-monitoring .search-controls {
+        grid-template-columns: 40px 250px 1fr 120px 130px;
+        align-items: center;
+        gap: 8px;
+      }
+
+      #further-monitoring .search-controls .search-input {
+        grid-column: 2 / 4;
+        width: 100%;
+      }
+
+      #further-monitoring .search-controls .filter-select {
+        grid-column: 4;
+        justify-self: stretch;
+        width: 100%;
+      }
+
+      #unprocessed-profiles .search-controls {
+        grid-template-columns: 250px 1fr 120px 120px;
+        align-items: center;
+        gap: 8px;
+      }
+
+      #unprocessed-profiles .search-controls .search-input {
+        grid-column: 1 / 3;
+        width: 100%;
+      }
+
+      #unprocessed-profiles .search-controls .filter-select {
         grid-column: 3;
+        justify-self: stretch;
+        width: 100%;
+      }
+
+      /* Ensure consistent timestamp sizing across all tabs */
+      #unprocessed-profiles .timestamp {
+        font-size: 13px;
       }
 
       #reported-profiles .search-controls {
-        grid-template-columns: 1fr auto auto auto;
+        grid-template-columns: 40px 250px 1fr 120px 120px 130px;
+        align-items: center;
+        gap: 8px;
+      }
+
+      #reported-profiles .search-controls .search-input {
+        grid-column: 2 / 4;
+        width: 100%;
+      }
+
+      #reported-profiles .search-controls .filter-select:first-of-type {
+        grid-column: 4;
+        justify-self: stretch;
+        width: 100%;
+      }
+
+      #reported-profiles .search-controls .filter-select:last-of-type {
+        grid-column: 5;
+        justify-self: stretch;
+        width: 100%;
       }
 
       /* Results Table */
@@ -387,20 +495,20 @@
       }
 
       .flagged-comments-header {
-        grid-template-columns: 150px 200px 1fr 120px 120px 100px;
+        grid-template-columns: 40px 250px 1fr 120px 120px 130px;
       }
 
-      .flagged-comments-header > div:nth-child(3),
-      .reported-profiles-header > div:nth-child(3) {
-        color: #ffd700;
+      .flagged-comments-header > div:nth-child(4),
+      .reported-profiles-header > div:nth-child(4) {
+        color: #ffffff;
       }
 
       .villains-header {
-        grid-template-columns: 150px 200px 1fr 120px 100px;
+        grid-template-columns: 40px 250px 1fr 120px 130px;
       }
 
       .reported-profiles-header {
-        grid-template-columns: 150px 200px 1fr 120px 120px 100px;
+        grid-template-columns: 40px 250px 1fr 120px 120px 130px;
       }
 
       .table-row {
@@ -413,20 +521,21 @@
       }
 
       .flagged-comments-row {
-        grid-template-columns: 150px 200px 1fr 120px 120px 100px;
+        grid-template-columns: 40px 250px 1fr 120px 120px 130px;
       }
 
       .villains-row {
-        grid-template-columns: 150px 200px 1fr 120px 100px;
+        grid-template-columns: 40px 250px 1fr 120px 130px;
       }
 
       .reported-profiles-row {
-        grid-template-columns: 150px 200px 1fr 120px 120px 100px;
+        grid-template-columns: 40px 250px 1fr 120px 120px 130px;
       }
 
       /* Smooth row hover animations */
-      .table-row > div:first-child,
-      .table-row > div:nth-child(2) {
+      .table-row > div:nth-child(2),
+      .table-row > div:nth-child(3),
+      .table-row > div:nth-child(2) small {
         transition: all 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
       }
 
@@ -435,8 +544,8 @@
         transform: translateX(8px);
       }
 
-      .table-row.hover-report > div:nth-child(2) {
-        color: #ff4444;
+      .table-row.hover-report > div:nth-child(2) small {
+        color: #ff4444 !important;
         transform: translateX(8px);
       }
 
@@ -446,13 +555,13 @@
         transform: translateX(8px);
       }
 
-      #reported-profiles .table-row.hover-report > div:nth-child(2) {
-        color: #4caf50;
+      #reported-profiles .table-row.hover-report > div:nth-child(2) small {
+        color: #4caf50 !important;
         transform: translateX(8px);
       }
 
-      #reported-profiles .table-row.hover-confirm > div:nth-child(2) {
-        color: #4caf50;
+      #reported-profiles .table-row.hover-confirm > div:nth-child(2) small {
+        color: #4caf50 !important;
         transform: translateX(8px);
       }
 
@@ -473,6 +582,7 @@
         flex-direction: column;
         gap: 2px;
         line-height: 1.2;
+        align-items: flex-start;
       }
 
       .status-badge {
@@ -488,10 +598,23 @@
         color: #4caf50;
       }
 
+      /* Status colors for report center */
+      .status-badge.pending-manual-review {
+        color: #cc0000;
+      }
+
+      .status-badge.pending-review {
+        color: #cc0000;
+      }
+
+      .status-badge.reported {
+        color: #00cc00;
+      }
+
       .actions {
         display: flex;
         gap: 12px;
-        justify-content: center;
+        justify-content: flex-start;
       }
 
       /* Action Buttons */
@@ -596,18 +719,18 @@
       }
 
       .remove-button {
-        background-color: rgba(255, 152, 0, 0.1);
-        border: 1px solid rgba(255, 152, 0, 0.3);
+        background-color: rgba(180, 50, 50, 0.2);
+        border: 1px solid rgba(180, 50, 50, 0.5);
       }
 
       .remove-button:hover {
-        background-color: #ff9800;
-        border-color: #ff9800;
-        box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+        background-color: #b43232;
+        border-color: #b43232;
+        box-shadow: 0 2px 8px rgba(180, 50, 50, 0.4);
       }
 
       .remove-button .icon {
-        color: #ff9800;
+        color: #b43232;
       }
 
       .remove-button:hover .icon {
@@ -672,7 +795,6 @@
         padding: 12px;
         font-family: inherit;
         font-size: 14px;
-        resize: vertical;
         margin-bottom: 16px;
       }
 
@@ -735,10 +857,13 @@
 
       .table-row > div:nth-child(2) {
         font-size: 12px;
-        color: #87ceeb;
       }
 
       .table-row > div:nth-child(3) {
+        font-size: 12px;
+      }
+
+      .table-row > div:nth-child(4) {
         font-size: 14px;
       }
 
@@ -771,6 +896,32 @@
         color: #9c27b0;
       }
 
+      /* Avatar styles */
+      .avatar-cell {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .steam-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+        object-fit: cover;
+      }
+
+      .steam-avatar-placeholder {
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+        background-color: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: #666;
+      }
+
       /* User Notes column styling */
       .user-notes {
         color: #ffd700;
@@ -785,7 +936,7 @@
       }
 
       .table-header .user-notes-header {
-        color: #ffd700;
+        color: #ffffff;
       }
 
       /* Edit button hover effect on user notes */
@@ -793,6 +944,73 @@
         color: #ffd700;
         transform: translateX(8px) scale(1.05);
         text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+      }
+
+      /* Search terms container */
+      .search-terms-list {
+        max-height: calc(100vh - 380px);
+        overflow-y: auto;
+        border: 1px solid #333333;
+        background-color: transparent;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* Internet Explorer 10+ */
+      }
+
+      /* Hide scrollbar for WebKit browsers */
+      .search-terms-list::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* Borderless variant for inline search terms */
+      .search-terms-list.borderless {
+        border: none;
+        background-color: transparent;
+        height: 200px;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .search-terms-list:focus-within {
+        border-color: #ffd700;
+      }
+
+      /* Smaller delete buttons specifically for search terms lists */
+      .search-terms-list .remove-button {
+        width: 20px;
+        height: 20px;
+      }
+
+      .search-terms-list .remove-button .icon {
+        width: 12px;
+        height: 12px;
+      }
+
+      /* Search term hover highlighting - specific transitions only */
+
+      .search-term-item:has(.remove-button:hover) .search-term-text {
+        color: #ff6b6b !important;
+        background-color: rgba(255, 107, 107, 0.1);
+        padding: 2px 4px;
+        border-radius: 3px;
+      }
+
+      /* Prevent action button transitions from affecting search term buttons */
+      .search-terms-list .action-button {
+        transition: background-color 0.2s ease, border-color 0.2s ease,
+          box-shadow 0.2s ease !important;
+        transform: none !important;
+      }
+
+      /* Re-enable only the specific transitions we want for search term buttons */
+      .search-terms-list .action-button:hover {
+        transform: none !important;
+      }
+
+      /* Ensure search term text only animates when its own button is hovered */
+      .search-term-item .search-term-text {
+        transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+          background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+          padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
     </style>
   </head>
@@ -833,13 +1051,73 @@
     <section class="input-section">
       <div class="input-container">
         <div class="url-input-wrapper">
-          <label for="url-input">Enter Steam Profile URLs (one per line)</label>
+          <div class="crawler-header">
+            <h2 style="color: #ffd700; margin: 0 0 16px 0">Crawler</h2>
+            <div class="crawl-timer" id="crawl-timer">00:00:00</div>
+            <span class="crawl-status" id="crawl-status"></span>
+          </div>
           <textarea
             id="url-input"
             class="url-textarea"
-            placeholder="https://steamcommunity.com/id/username&#10;https://steamcommunity.com/profiles/76561198000000000"
+            placeholder=""
           ></textarea>
-          <button class="crawl-button" style="margin-top: 16px">CRAWL</button>
+        </div>
+        <div class="search-terms-wrapper">
+          <div style="display: flex; gap: 20px; height: 100%">
+            <!-- Left side: Controls (75%) -->
+            <div style="flex: 0 0 75%; display: flex; flex-direction: column">
+              <h2 style="color: #ffd700; margin: 0 0 74px 0">
+                Search Terms
+                <span
+                  id="inline-hate-terms-count"
+                  style="color: #666; font-size: 14px; font-weight: normal"
+                  >0 terms</span
+                >
+              </h2>
+              <div
+                style="
+                  display: flex;
+                  gap: 10px;
+                  margin-bottom: 16px;
+                  align-items: center;
+                "
+              >
+                <input
+                  type="text"
+                  id="inline-new-hate-term-input"
+                  class="search-input"
+                  placeholder="Add term..."
+                  style="width: 400px"
+                />
+              </div>
+              <div
+                style="
+                  display: flex;
+                  gap: 10px;
+                  margin-bottom: 16px;
+                  align-items: center;
+                "
+              >
+                <input
+                  type="text"
+                  id="inline-hate-terms-search"
+                  class="search-input"
+                  placeholder="Search terms list..."
+                  style="width: 400px"
+                  onkeyup="filterInlineHateTerms()"
+                />
+              </div>
+            </div>
+            <!-- Right side: Search Terms List (40%) -->
+            <div style="flex: 0 0 40%">
+              <div class="results-table" style="margin-top: 0; height: 100%">
+                <div
+                  id="inline-hate-terms-results"
+                  class="search-terms-list borderless"
+                ></div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="crawl-output-wrapper">
           <div class="crawl-output" id="crawl-output">
@@ -869,21 +1147,37 @@
 
     <!-- Analysis Section -->
     <section class="analysis-section">
-      <!-- Tabs -->
+      <!-- Header with Tabs -->
       <div class="tabs-container">
-        <div class="tabs">
-          <button class="tab active" data-tab="flagged-comments">
-            COMMENTS
-          </button>
-          <button class="tab" data-tab="villains">VILLAINS</button>
-          <button class="tab" data-tab="further-monitoring">MONITORING</button>
-          <button class="tab" data-tab="reported-profiles">
-            REPORT CENTER
-          </button>
-          <button class="tab" data-tab="unprocessed-profiles">
-            UNPROCESSED PROFILES
-          </button>
-          <button class="tab" data-tab="hate-terms">SEARCH TERMS</button>
+        <div
+          class="tabs"
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+          "
+        >
+          <h2 style="color: #ffd700; margin: 0; position: absolute; left: 0">
+            Analysis
+          </h2>
+          <div style="display: flex; gap: 2px">
+            <button class="tab active" data-tab="flagged-comments">
+              COMMENTS
+            </button>
+            <button class="tab" data-tab="villains">VILLAINS</button>
+            <button class="tab" data-tab="further-monitoring">
+              MONITORING
+            </button>
+            <button class="tab" data-tab="reported-profiles">
+              REPORT CENTER
+            </button>
+            <button class="tab" data-tab="unprocessed-profiles">
+              UNPROCESSED PROFILES
+            </button>
+          </div>
         </div>
       </div>
 
@@ -893,8 +1187,13 @@
           <div class="search-controls">
             <input
               type="text"
-              class="search-input"
-              placeholder="Search by SteamID or Known Aliases..."
+              class="search-input steamid-search"
+              placeholder="Search by Steam ID or Alias..."
+            />
+            <input
+              type="text"
+              class="search-input comment-search"
+              placeholder="Search Comments..."
             />
             <select class="filter-select" id="sort-select">
               <option value="newest">Newest</option>
@@ -906,73 +1205,22 @@
               <option>Past 24 Hours</option>
               <option>Past 7 Days</option>
             </select>
-            <button class="search-button">SEARCH</button>
           </div>
 
           <div class="results-table">
             <div class="table-header flagged-comments-header">
-              <div>Steam ID</div>
-              <div>Known Aliases</div>
+              <div></div>
+              <div>
+                <div>Steam ID</div>
+                <div>& Alias</div>
+              </div>
               <div>Comment</div>
               <div>Date Commented</div>
               <div>
                 <div>Date</div>
                 <div>Added</div>
               </div>
-              <div>Actions</div>
-            </div>
-
-            <!-- Sample Data Row -->
-            <div class="table-row flagged-comments-row">
-              <div class="steam-id">76561198123456789</div>
-              <div>ToxicUser123</div>
-              <div class="comment-text">
-                This is a sample flagged comment containing hate speech terms
-                that were detected by the system.
-              </div>
-              <div class="timestamp">
-                <div>2025-07-31</div>
-                <div>14:23</div>
-              </div>
-              <div class="timestamp">
-                <div>2025-08-03</div>
-                <div>10:45</div>
-              </div>
-              <div class="actions">
-                <button class="action-button report-button" title="Report">
-                  <svg class="icon" viewBox="0 0 24 24">
-                    <path
-                      d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                    />
-                  </svg>
-                </button>
-                <button
-                  class="action-button monitor-button"
-                  title="Add to monitoring"
-                >
-                  <svg class="icon eye-closed" viewBox="0 0 24 24">
-                    <path
-                      d="M12 14c1.66 0 3-1.34 3-3 0-1.66-1.34-3-3-3s-3 1.34-3 3c0 1.66 1.34 3 3 3z"
-                    />
-                    <path
-                      d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    />
-                    <path
-                      d="M1 1l22 22"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    />
-                  </svg>
-                  <svg class="icon eye-open" viewBox="0 0 24 24">
-                    <path
-                      d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
-                    />
-                  </svg>
-                </button>
-              </div>
+              <div></div>
             </div>
           </div>
         </div>
@@ -983,48 +1231,35 @@
           <!-- Manual Add Villain Section -->
           <div
             class="add-villain-section"
-            style="
-              padding: 16px 0;
-              margin-bottom: 16px;
-              border-bottom: 1px solid rgba(255, 215, 0, 0.1);
-            "
+            style="padding: 16px 0; margin-bottom: 8px"
           >
             <div
               style="
                 display: grid;
-                grid-template-columns: auto 1fr 0.7fr auto;
+                grid-template-columns: 40px 250px 1fr;
                 gap: 16px;
                 align-items: center;
               "
             >
-              <h2 style="color: #ffd700; margin: 0">
-                Add Villain
-              </h2>
+              <div></div>
+              <h2 style="color: #ffd700; margin: 0">Add Villain</h2>
               <input
                 type="text"
                 id="manual-steam-id-input"
                 class="search-input"
-                placeholder="Steam ID (76561198123456789) or Custom URL (username)"
+                placeholder="Enter a Steam ID or User Alias..."
                 style="margin: 0"
+                onkeydown="if(event.key === 'Enter') addManualVillain()"
               />
-              <input
-                type="text"
-                id="manual-alias-input"
-                class="search-input"
-                placeholder="Additional known Aliases (optional)"
-                style="margin: 0"
-              />
-              <button class="search-button" onclick="addManualVillain()">
-                ADD VILLAIN
-              </button>
             </div>
           </div>
 
           <div class="search-controls">
             <input
               type="text"
+              id="villains-search-input"
               class="search-input"
-              placeholder="Search by SteamID or Known Aliases..."
+              placeholder="Search by Steam ID or Alias..."
             />
             <select class="filter-select" id="villains-sort-select">
               <option value="newest">Newest</option>
@@ -1036,19 +1271,24 @@
               <option>Past 24 Hours</option>
               <option>Past 7 Days</option>
             </select>
-            <button class="search-button">SEARCH</button>
           </div>
 
           <div class="results-table">
             <div class="table-header villains-header">
-              <div>Steam ID</div>
-              <div>Known Aliases</div>
-              <div class="user-notes-header">User Notes</div>
+              <div></div>
+              <div>
+                <div>Steam ID</div>
+                <div>& Alias</div>
+              </div>
+              <div class="user-notes-header">
+                <div>User</div>
+                <div>Notes</div>
+              </div>
               <div>
                 <div>Date</div>
                 <div>Added</div>
               </div>
-              <div>Actions</div>
+              <div></div>
             </div>
 
             <div class="empty-state">
@@ -1065,12 +1305,12 @@
             <input
               type="text"
               class="search-input"
-              placeholder="Search by SteamID or Known Aliases..."
+              placeholder="Search by Steam ID or Alias..."
             />
             <select class="filter-select" id="reported-status-filter">
               <option>All Statuses</option>
-              <option>Pending Manual Review</option>
-              <option>Report Submitted</option>
+              <option>Pending Review</option>
+              <option>Reported</option>
             </select>
             <select class="filter-select" id="reported-time-filter">
               <option>All Time</option>
@@ -1078,20 +1318,22 @@
               <option>Past 24 Hours</option>
               <option>Past 7 Days</option>
             </select>
-            <button class="search-button">SEARCH</button>
           </div>
 
           <div class="results-table">
             <div class="table-header reported-profiles-header">
-              <div>Steam ID</div>
-              <div>Known Aliases</div>
+              <div></div>
+              <div>
+                <div>Steam ID</div>
+                <div>& Alias</div>
+              </div>
               <div>Comment</div>
               <div>Status</div>
               <div>
                 <div>Date</div>
                 <div>Added</div>
               </div>
-              <div>Actions</div>
+              <div></div>
             </div>
 
             <div class="empty-state">
@@ -1110,7 +1352,7 @@
             <input
               type="text"
               class="search-input"
-              placeholder="Search by SteamID or Known Aliases..."
+              placeholder="Search by Steam ID or Alias..."
             />
             <select class="filter-select" id="monitoring-time-filter">
               <option>All Time</option>
@@ -1118,7 +1360,6 @@
               <option>Past 24 Hours</option>
               <option>Past 7 Days</option>
             </select>
-            <button class="search-button">SEARCH</button>
           </div>
 
           <div class="results-table">
@@ -1139,7 +1380,7 @@
             <input
               type="text"
               class="search-input"
-              placeholder="Search by SteamID or Known Aliases..."
+              placeholder="Search by Steam ID or Alias..."
             />
             <select class="filter-select" id="unprocessed-time-filter">
               <option>All Time</option>
@@ -1147,7 +1388,6 @@
               <option>Past 24 Hours</option>
               <option>Past 7 Days</option>
             </select>
-            <button class="search-button">SEARCH</button>
           </div>
 
           <div class="results-table">
@@ -1157,76 +1397,6 @@
                 Profiles that couldn't be processed due to system limits will
                 appear here
               </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Search Terms Tab -->
-      <div class="tab-content" id="hate-terms">
-        <div class="content-wrapper">
-          <div class="hate-terms-container">
-            <div
-              class="hate-terms-header"
-              style="
-                display: flex;
-                align-items: center;
-                gap: 20px;
-                margin-bottom: 16px;
-              "
-            >
-              <h2 style="color: #ffd700; margin: 0">Manage Search Terms</h2>
-              <div
-                class="add-term-section"
-                style="display: flex; align-items: center"
-              >
-                <input
-                  type="text"
-                  id="new-hate-term-input"
-                  class="search-input"
-                  placeholder="Enter new search term..."
-                  style="width: 250px; margin-right: 10px"
-                />
-                <button class="search-button" onclick="addHateTerm()">
-                  Add Term
-                </button>
-              </div>
-            </div>
-
-            <div
-              class="search-controls"
-              style="grid-template-columns: 1fr auto; margin-bottom: 16px"
-            >
-              <input
-                type="text"
-                id="hate-terms-search"
-                class="search-input"
-                placeholder="Search search terms..."
-                onkeyup="filterHateTerms()"
-              />
-              <span id="hate-terms-count" style="color: #666">0 terms</span>
-            </div>
-
-            <div class="results-table" style="margin-top: 0">
-              <div
-                class="table-header"
-                style="
-                  display: grid;
-                  grid-template-columns: 1fr 100px;
-                  padding: 12px 0;
-                "
-              >
-                <div>Term</div>
-                <div>Actions</div>
-              </div>
-              <div
-                id="hate-terms-results"
-                style="max-height: calc(100vh - 380px); overflow-y: auto"
-              >
-                <p style="text-align: center; color: #666; padding: 20px">
-                  Loading search terms...
-                </p>
-              </div>
             </div>
           </div>
         </div>
@@ -1254,6 +1424,9 @@
     </div>
 
     <script>
+      // Test if JavaScript is working at all
+      console.log("JavaScript is loading...");
+
       // API base URL
       const API_BASE = "http://localhost:5001/api";
 
@@ -1278,36 +1451,152 @@
         });
       });
 
-      // Crawl functionality
-      document
-        .querySelector(".crawl-button")
-        .addEventListener("click", async function () {
-          const urlInput = document.getElementById("url-input");
-          const urls = urlInput.value.split("\n").filter((url) => url.trim());
+      // Timer variables
+      let crawlStartTime = null;
+      let timerInterval = null;
 
-          if (urls.length === 0) {
-            alert("Please enter at least one URL");
-            return;
-          }
+      // Format time as MM:SS:MS
+      function formatTime(milliseconds) {
+        const totalMs = Math.floor(milliseconds);
+        const minutes = Math.floor(totalMs / 60000);
+        const seconds = Math.floor((totalMs % 60000) / 1000);
+        const ms = Math.floor((totalMs % 1000) / 10); // Show centiseconds
 
-          this.textContent = "CRAWLING...";
-          this.style.color = "#666";
+        return `${minutes.toString().padStart(2, "0")}:${seconds
+          .toString()
+          .padStart(2, "0")}:${ms.toString().padStart(2, "0")}`;
+      }
 
-          try {
-            const response = await fetch(`${API_BASE}/crawl`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ urls }),
-            });
+      // Start timer and hide status
+      function startCrawlTimer() {
+        const timer = document.getElementById("crawl-timer");
+        const status = document.getElementById("crawl-status");
 
-            if (response.ok) {
-              // Start polling for status
-              pollCrawlStatus();
+        crawlStartTime = Date.now();
+        timer.classList.add("show");
+        status.classList.remove("show");
+
+        // Update timer every 10ms for smooth display
+        timerInterval = setInterval(() => {
+          const elapsed = Date.now() - crawlStartTime;
+          timer.textContent = formatTime(elapsed);
+        }, 10);
+      }
+
+      // Stop timer
+      function stopCrawlTimer() {
+        const timer = document.getElementById("crawl-timer");
+
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+
+        timer.classList.remove("show");
+        crawlStartTime = null;
+      }
+
+      // Show crawl status
+      function showCrawlStatus(message, isSuccess = false) {
+        const status = document.getElementById("crawl-status");
+        status.textContent = message;
+        status.style.color = isSuccess ? "#ffd700" : "#ff6b6b"; // Yellow for success, red for failure
+        status.classList.add("show");
+
+        // Auto-hide status after 8 seconds for success, 5 seconds for failure
+        setTimeout(
+          () => {
+            status.classList.remove("show");
+          },
+          isSuccess ? 8000 : 5000
+        );
+      }
+
+      // Show success status based on exit reason
+      async function showSuccessStatus() {
+        try {
+          const response = await fetch(`${API_BASE}/crawl/summary`);
+          if (response.ok) {
+            const summary = await response.json();
+            const exitReason = summary.exit_reason || "Unknown";
+
+            // Map exit reasons to user-friendly messages
+            let successMessage = "Success";
+            if (
+              exitReason.toLowerCase().includes("profile") &&
+              exitReason.toLowerCase().includes("threshold")
+            ) {
+              successMessage = "Success - Profile limit reached";
+            } else if (
+              exitReason.toLowerCase().includes("runtime") &&
+              exitReason.toLowerCase().includes("threshold")
+            ) {
+              successMessage = "Success - Time limit reached";
+            } else if (
+              exitReason.toLowerCase().includes("queue") &&
+              exitReason.toLowerCase().includes("empty")
+            ) {
+              successMessage = "Success - Queue completed";
+            } else if (exitReason !== "Unknown") {
+              successMessage = `Success - ${exitReason}`;
+            } else {
+              successMessage = "Success - Completed";
             }
-          } catch (error) {
-            console.error("Crawl failed:", error);
-            this.textContent = "CRAWL";
-            this.style.color = "#ffd700";
+
+            showCrawlStatus(successMessage, true);
+          } else {
+            // If we can't get summary, still show generic success
+            showCrawlStatus("Success - Completed", true);
+          }
+        } catch (error) {
+          console.error("Failed to fetch success status:", error);
+          // If there's an error getting the summary, still show generic success
+          showCrawlStatus("Success - Completed", true);
+        }
+      }
+
+      // Crawl functionality
+      async function startCrawl() {
+        const urlInput = document.getElementById("url-input");
+        const urls = urlInput.value.split("\n").filter((url) => url.trim());
+
+        if (urls.length === 0) {
+          alert("Please enter at least one URL");
+          return;
+        }
+
+        // Start timer when crawl starts
+        startCrawlTimer();
+
+        try {
+          const response = await fetch(`${API_BASE}/crawl`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ urls }),
+          });
+
+          if (response.ok) {
+            // Start polling for status
+            pollCrawlStatus();
+          } else {
+            // Handle failed response
+            stopCrawlTimer();
+            showCrawlStatus("Crawl Failed");
+          }
+        } catch (error) {
+          console.error("Crawl failed:", error);
+          stopCrawlTimer();
+          showCrawlStatus("Crawl Failed");
+        }
+      }
+
+      // Add event listener for Enter key on URL input
+      document
+        .getElementById("url-input")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault(); // Prevent default new line behavior
+            startCrawl();
           }
         });
 
@@ -1320,17 +1609,22 @@
 
             if (!status.active) {
               clearInterval(interval);
-              document.querySelector(".crawl-button").textContent = "CRAWL";
-              document.querySelector(".crawl-button").style.color = "#ffd700";
 
-              // Fetch and display crawl summary
+              // Stop timer when crawl completes
+              stopCrawlTimer();
+
+              // Fetch and display crawl summary, then show success status
               await displayCrawlSummary();
+              await showSuccessStatus();
 
               // Refresh the current tab
               loadCurrentTab();
             }
           } catch (error) {
             console.error("Status poll failed:", error);
+            clearInterval(interval);
+            stopCrawlTimer();
+            showCrawlStatus("Crawl Failed");
           }
         }, 2000); // Poll every 2 seconds
       }
@@ -1391,6 +1685,10 @@
       // Load data for current tab
       async function loadCurrentTab() {
         const activeTab = document.querySelector(".tab.active");
+        if (!activeTab) {
+          console.error("No active tab found");
+          return;
+        }
         const tabName = activeTab.getAttribute("data-tab");
 
         switch (tabName) {
@@ -1409,24 +1707,32 @@
           case "unprocessed-profiles":
             await loadUnprocessedProfiles();
             break;
-          case "hate-terms":
-            await loadHateTerms();
-            break;
         }
       }
 
       // Load flagged comments
       async function loadFlaggedComments() {
-        const searchInput = document.querySelector(
-          "#flagged-comments .search-input"
+        const steamidSearchInput = document.querySelector(
+          "#flagged-comments .steamid-search"
+        );
+        const commentSearchInput = document.querySelector(
+          "#flagged-comments .comment-search"
         );
         const timeFilterSelect = document.querySelector("#time-filter-select");
         const sortSelect = document.querySelector(
           "#flagged-comments #sort-select"
         );
 
+        const steamidSearch = steamidSearchInput
+          ? steamidSearchInput.value
+          : "";
+        const commentSearch = commentSearchInput
+          ? commentSearchInput.value
+          : "";
+        const combinedSearch = (steamidSearch + " " + commentSearch).trim();
+
         const params = new URLSearchParams({
-          search: searchInput.value,
+          search: combinedSearch,
           time_filter: getTimeFilterValue(timeFilterSelect.value),
           sort: sortSelect ? sortSelect.value : "newest",
         });
@@ -1493,11 +1799,23 @@
         sortedComments.forEach((comment) => {
           const row = document.createElement("div");
           row.className = "table-row flagged-comments-row";
+
+          // Create avatar HTML
+          const avatarHtml =
+            comment.avatar_data && comment.avatar_data.avatarfull
+              ? `<img src="${comment.avatar_data.avatarfull}" alt="Avatar" class="steam-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+               <div class="steam-avatar-placeholder" style="display:none;">?</div>`
+              : `<div class="steam-avatar-placeholder">?</div>`;
+
           row.innerHTML = `
+                    <div class="avatar-cell">${avatarHtml}</div>
                     <div class="steam-id" data-steamid="${
                       comment.commenter_steamid
-                    }">${comment.commenter_steamid}</div>
-                    <div>${comment.commenter_alias}</div>
+                    }">${
+            comment.commenter_steamid
+          }<br><small style="color: #87ceeb;">${
+            comment.commenter_alias || "No alias"
+          }</small></div>
                     <div class="comment-text">${comment.comment_text}</div>
                     <div class="timestamp">${formatDate(
                       comment.comment_date
@@ -1506,16 +1824,7 @@
                       comment.comment_scraped
                     )}</div>
                     <div class="actions">
-                        <button class="action-button report-button" 
-                                data-steamid="${comment.commenter_steamid}"
-                                data-alias="${comment.commenter_alias}"
-                                data-commentid="${comment.id}"
-                                title="Report">
-                            <svg class="icon" viewBox="0 0 24 24">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                            </svg>
-                        </button>
-                        <button class="action-button monitor-button"
+                                                <button class="action-button monitor-button"
                                 data-steamid="${comment.commenter_steamid}"
                                 data-alias="${comment.commenter_alias}"
                                 title="Add to monitoring">
@@ -1526,6 +1835,25 @@
                             </svg>
                             <svg class="icon eye-open" viewBox="0 0 24 24">
                                 <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                            </svg>
+                        </button>
+                        <button class="action-button edit-button"
+                                data-steamid="${comment.commenter_steamid}"
+                                data-alias="${comment.commenter_alias}"
+                                data-profileid=""
+                                data-notes=""
+                                title="Edit user notes">
+                            <svg class="icon" viewBox="0 0 24 24">
+                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                            </svg>
+                        </button>
+                        <button class="action-button report-button" 
+                                data-steamid="${comment.commenter_steamid}"
+                                data-alias="${comment.commenter_alias}"
+                                data-commentid="${comment.id}"
+                                title="Report">
+                            <svg class="icon" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                             </svg>
                         </button>
                     </div>
@@ -1589,12 +1917,40 @@
                       }),
                     });
                     if (forceResponse.ok) {
-                      alert("Profile reported successfully");
+                      const forceResult = await forceResponse.json();
+                      // Show appropriate message based on whether screenshot is being captured
+                      if (
+                        commentId &&
+                        forceResult.message.includes(
+                          "Screenshot capture in progress"
+                        )
+                      ) {
+                        showToast(
+                          "Profile reported successfully! Screenshot capture in progress - check ~/Downloads/steam_screenshots/",
+                          "success"
+                        );
+                      } else {
+                        showToast("Profile reported successfully", "success");
+                      }
                       loadCurrentTab();
                     }
                   }
                 } else {
-                  alert(result.message || "Profile reported successfully");
+                  // Show appropriate message based on whether screenshot is being captured
+                  if (
+                    commentId &&
+                    result.message.includes("Screenshot capture in progress")
+                  ) {
+                    showToast(
+                      "Profile reported successfully! Screenshot capture in progress - check ~/Downloads/steam_screenshots/",
+                      "success"
+                    );
+                  } else {
+                    showToast(
+                      result.message || "Profile reported successfully",
+                      "success"
+                    );
+                  }
                   loadCurrentTab();
                 }
               }
@@ -1681,43 +2037,45 @@
         });
 
         // Remove from monitoring buttons
-        document.querySelectorAll(".remove-button").forEach((button) => {
-          const row = button.closest(".table-row");
+        document
+          .querySelectorAll(".table-row .remove-button")
+          .forEach((button) => {
+            const row = button.closest(".table-row");
 
-          button.addEventListener("mouseenter", () => {
-            row.classList.add("hover-monitor");
-          });
+            button.addEventListener("mouseenter", () => {
+              row.classList.add("hover-monitor");
+            });
 
-          button.addEventListener("mouseleave", () => {
-            row.classList.remove("hover-monitor");
-          });
+            button.addEventListener("mouseleave", () => {
+              row.classList.remove("hover-monitor");
+            });
 
-          button.addEventListener("click", async (e) => {
-            e.stopPropagation();
-            const steamId = button.dataset.steamid;
-            const alias = button.dataset.alias;
-            const profileId = button.dataset.profileid;
+            button.addEventListener("click", async (e) => {
+              e.stopPropagation();
+              const steamId = button.dataset.steamid;
+              const alias = button.dataset.alias;
+              const profileId = button.dataset.profileid;
 
-            try {
-              const response = await fetch(`${API_BASE}/remove-monitoring`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  steam_id: steamId,
-                  alias: alias,
-                  profile_id: profileId,
-                }),
-              });
+              try {
+                const response = await fetch(`${API_BASE}/remove-monitoring`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    steam_id: steamId,
+                    alias: alias,
+                    profile_id: profileId,
+                  }),
+                });
 
-              if (response.ok) {
-                alert("Removed from monitoring");
-                loadCurrentTab(); // Refresh the data
+                if (response.ok) {
+                  alert("Removed from monitoring");
+                  loadCurrentTab(); // Refresh the data
+                }
+              } catch (error) {
+                console.error("Remove from monitoring failed:", error);
               }
-            } catch (error) {
-              console.error("Remove from monitoring failed:", error);
-            }
+            });
           });
-        });
 
         // Edit user notes buttons
         document.querySelectorAll(".edit-button").forEach((button) => {
@@ -1766,7 +2124,7 @@
         });
       }
 
-      // Format date helper
+      // Format date helper - standard formatting for most timestamps
       function formatDate(dateString) {
         const date = new Date(dateString);
         console.log(
@@ -1777,20 +2135,42 @@
           "timezone offset:",
           date.getTimezoneOffset()
         );
+
         const dateStr = date.toLocaleDateString("en-US");
         const timeStr = date.toLocaleTimeString("en-US", {
           hour: "numeric",
           minute: "2-digit",
-          hour12: true
+          hour12: true,
         });
         console.log("formatted output:", dateStr, timeStr);
         return `<div>${dateStr}</div><div>${timeStr}</div>`;
       }
 
-      // Search button handlers
-      document.querySelectorAll(".search-button").forEach((button) => {
-        button.addEventListener("click", loadCurrentTab);
-      });
+      // Format date helper for submitted_date - needs 4 hour adjustment
+      function formatSubmittedDate(dateString) {
+        const date = new Date(dateString);
+
+        // Adjust the date to compensate for the 4-hour difference
+        // Subtract 4 hours (4 * 60 * 60 * 1000 = 14400000 ms) to fix the ahead time
+        const adjustedDate = new Date(date.getTime() - 4 * 60 * 60 * 1000);
+
+        console.log(
+          "formatSubmittedDate input:",
+          dateString,
+          "original date:",
+          date,
+          "adjusted date:",
+          adjustedDate
+        );
+
+        const dateStr = adjustedDate.toLocaleDateString("en-US");
+        const timeStr = adjustedDate.toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        });
+        return `<div>${dateStr}</div><div>${timeStr}</div>`;
+      }
 
       // Sort dropdown change handler
       document.querySelector("#sort-select").addEventListener("change", () => {
@@ -1847,7 +2227,7 @@
 
       // Load villains
       async function loadVillains() {
-        const searchInput = document.querySelector("#villains .search-input");
+        const searchInput = document.querySelector("#villains-search-input");
         const sortSelect = document.querySelector("#villains-sort-select");
         const timeFilterSelect = document.querySelector(
           "#villains-time-filter"
@@ -1908,11 +2288,21 @@
         sortedVillains.forEach((villain) => {
           const row = document.createElement("div");
           row.className = "table-row villains-row";
+
+          // Create avatar HTML
+          const avatarHtml =
+            villain.avatar_data && villain.avatar_data.avatarfull
+              ? `<img src="${villain.avatar_data.avatarfull}" alt="Avatar" class="steam-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+               <div class="steam-avatar-placeholder" style="display:none;">?</div>`
+              : `<div class="steam-avatar-placeholder">?</div>`;
+
           row.innerHTML = `
+                    <div class="avatar-cell">${avatarHtml}</div>
                     <div class="steam-id" data-steamid="${villain.steam_id}">${
             villain.steam_id
-          }</div>
-                    <div>${villain.aliases}</div>
+          }<br><small style="color: #87ceeb;">${
+            villain.aliases || "No aliases"
+          }</small></div>
                     <div class="user-notes">${
                       villain.user_notes || "No notes"
                     }</div>
@@ -1922,6 +2312,19 @@
                         : "<div>Unknown</div><div></div>"
                     }</div>
                     <div class="actions">
+                                                <button class="action-button monitor-button"
+                                data-steamid="${villain.steam_id}"
+                                data-alias="${villain.aliases}"
+                                title="Add to monitoring">
+                            <svg class="icon eye-closed" viewBox="0 0 24 24">
+                                <path d="M12 14c1.66 0 3-1.34 3-3 0-1.66-1.34-3-3-3s-3 1.34-3 3c0 1.66 1.34 3 3 3z"/>
+                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" fill="none" stroke="currentColor" stroke-width="2"/>
+                                <path d="M1 1l22 22" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            <svg class="icon eye-open" viewBox="0 0 24 24">
+                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                            </svg>
+                        </button>
                         <button class="action-button edit-button"
                                 data-steamid="${villain.steam_id}"
                                 data-alias="${villain.aliases}"
@@ -1938,19 +2341,6 @@
                                 title="Report">
                             <svg class="icon" viewBox="0 0 24 24">
                                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                            </svg>
-                        </button>
-                        <button class="action-button monitor-button"
-                                data-steamid="${villain.steam_id}"
-                                data-alias="${villain.aliases}"
-                                title="Add to monitoring">
-                            <svg class="icon eye-closed" viewBox="0 0 24 24">
-                                <path d="M12 14c1.66 0 3-1.34 3-3 0-1.66-1.34-3-3-3s-3 1.34-3 3c0 1.66 1.34 3 3 3z"/>
-                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" fill="none" stroke="currentColor" stroke-width="2"/>
-                                <path d="M1 1l22 22" stroke="currentColor" stroke-width="2"/>
-                            </svg>
-                            <svg class="icon eye-open" viewBox="0 0 24 24">
-                                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
                             </svg>
                         </button>
                     </div>
@@ -2057,8 +2447,8 @@
       function getStatusFilterValue(dropdownValue) {
         const mapping = {
           "All Statuses": "all",
-          "Pending Manual Review": "pending manual review",
-          "Report Submitted": "report submitted",
+          "Pending Review": "pending review",
+          Reported: "reported",
         };
         return mapping[dropdownValue] || "all";
       }
@@ -2087,11 +2477,21 @@
         profiles.forEach((profile) => {
           const row = document.createElement("div");
           row.className = "table-row reported-profiles-row";
+
+          // Create avatar HTML
+          const avatarHtml =
+            profile.avatar_data && profile.avatar_data.avatarfull
+              ? `<img src="${profile.avatar_data.avatarfull}" alt="Avatar" class="steam-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+               <div class="steam-avatar-placeholder" style="display:none;">?</div>`
+              : `<div class="steam-avatar-placeholder">?</div>`;
+
           row.innerHTML = `
+                    <div class="avatar-cell">${avatarHtml}</div>
                     <div class="steam-id" data-steamid="${profile.steam_id}">${
             profile.steam_id
-          }</div>
-                    <div>${profile.alias}</div>
+          }<br><small style="color: #87ceeb;">${
+            profile.alias || "No alias"
+          }</small></div>
                     <div class="comment-text">${
                       profile.comment_text || "No comment text available"
                     }</div>
@@ -2099,34 +2499,21 @@
                       " ",
                       "-"
                     )}">${
-            profile.status === "report submitted" && profile.submitted_date
-              ? `report submitted<br><small style="font-size: 11px; color: #999;">${formatDate(
+            profile.status === "reported" && profile.submitted_date
+              ? `<span style="color: #00cc00;">REPORTED</span><br><small style="font-size: 11px; color: #999;">${formatSubmittedDate(
                   profile.submitted_date
                 )
                   .replace(/<div>/g, "")
                   .replace(/<\/div>/g, " ")
                   .trim()}</small>`
+              : profile.status === "pending review"
+              ? `<span style="color: #cc0000;">PENDING REVIEW</span>`
               : profile.status
           }</div>
                     <div class="timestamp">${formatDate(
                       profile.reported_date
                     )}</div>
                     <div class="actions">
-                        ${
-                          profile.status === "pending manual review"
-                            ? `
-                        <button class="action-button confirm-button"
-                                data-steamid="${profile.steam_id}"
-                                data-alias="${profile.alias}"
-                                data-profileid="${profile.id || ""}"
-                                title="Confirm report">
-                            <svg class="icon" viewBox="0 0 24 24">
-                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                            </svg>
-                        </button>
-                        `
-                            : ""
-                        }
                         <button class="action-button monitor-button"
                                 data-steamid="${profile.steam_id}"
                                 data-alias="${profile.alias}"
@@ -2140,6 +2527,21 @@
                                 <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
                             </svg>
                         </button>
+                        ${
+                          profile.status === "pending review"
+                            ? `
+                        <button class="action-button confirm-button"
+                                data-steamid="${profile.steam_id}"
+                                data-alias="${profile.alias}"
+                                data-profileid="${profile.id || ""}"
+                                title="Confirm report">
+                            <svg class="icon" viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                            </svg>
+                        </button>
+                        `
+                            : ""
+                        }
                     </div>
                 `;
           container.appendChild(row);
@@ -2164,27 +2566,45 @@
 
         if (profiles.length > 0) {
           container.innerHTML = `
-            <div class="table-header" style="grid-template-columns: 150px 200px 1fr 120px 100px;">
-              <div>Steam ID</div>
-              <div>Known Aliases</div>
-              <div class="user-notes-header">User Notes</div>
+            <div class="table-header" style="grid-template-columns: 40px 250px 1fr 120px 130px;">
+              <div></div>
+              <div>
+                <div>Steam ID</div>
+                <div>& Alias</div>
+              </div>
+              <div class="user-notes-header">
+                <div>User</div>
+                <div>Notes</div>
+              </div>
               <div>
                 <div>Date</div>
                 <div>Added</div>
               </div>
-              <div>Actions</div>
+              <div></div>
             </div>
           `;
 
           profiles.forEach((profile) => {
             const row = document.createElement("div");
             row.className = "table-row";
-            row.style.gridTemplateColumns = "150px 200px 1fr 120px 100px";
+            row.style.gridTemplateColumns = "40px 250px 1fr 120px 130px";
+
+            // Create avatar HTML
+            const avatarHtml =
+              profile.avatar_data && profile.avatar_data.avatarfull
+                ? `<img src="${profile.avatar_data.avatarfull}" alt="Avatar" class="steam-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                 <div class="steam-avatar-placeholder" style="display:none;">?</div>`
+                : `<div class="steam-avatar-placeholder">?</div>`;
+
             row.innerHTML = `
+                      <div class="avatar-cell">${avatarHtml}</div>
                       <div class="steam-id" data-steamid="${
                         profile.steam_id
-                      }">${profile.steam_id}</div>
-                      <div>${profile.alias}</div>
+                      }">${
+              profile.steam_id
+            }<br><small style="color: #87ceeb;">${
+              profile.alias || "No alias"
+            }</small></div>
                       <div class="user-notes">${
                         profile.user_notes || "No notes"
                       }</div>
@@ -2236,30 +2656,42 @@
 
         if (profiles.length > 0) {
           container.innerHTML = `
-            <div class="table-header" style="grid-template-columns: 150px 200px 1fr 80px 120px;">
-              <div>Steam ID</div>
-              <div>Known Aliases</div>
-              <div>Friend Path</div>
-              <div>Depth</div>
+            <div class="table-header" style="grid-template-columns: 250px 1fr 120px 120px;">
+              <div>
+                <div>Steam ID</div>
+                <div>& Alias</div>
+              </div>
+              <div>
+                <div>Path</div>
+                <div>Discovered</div>
+              </div>
               <div>
                 <div>Date</div>
                 <div>Added</div>
               </div>
+              <div> </div>
             </div>
           `;
 
           profiles.forEach((profile) => {
             const row = document.createElement("div");
             row.className = "table-row";
-            row.style.gridTemplateColumns = "150px 200px 1fr 80px 120px";
+            row.style.gridTemplateColumns = "250px 1fr 120px 120px";
             row.innerHTML = `
                       <div class="steam-id" data-steamid="${
                         profile.steam_id
-                      }">${profile.steam_id}</div>
-                      <div>${profile.known_aliases || "N/A"}</div>
+                      }">${
+              profile.steam_id
+            }<br><small style="color: #87ceeb;">${
+              profile.known_aliases || "No aliases"
+            }</small></div>
                       <div class="comment-text">${profile.friend_path}</div>
-                      <div>${profile.depth}</div>
-                      <div class="timestamp">${profile.added_timestamp ? formatDate(profile.added_timestamp) : "<div>Unknown</div><div></div>"}</div>
+                      <div class="timestamp">${
+                        profile.added_timestamp
+                          ? formatDate(profile.added_timestamp)
+                          : "<div>Unknown</div><div></div>"
+                      }</div>
+                      <div class="actions"></div>
                   `;
             container.appendChild(row);
           });
@@ -2360,116 +2792,118 @@
         }, 3000);
       }
 
-      // Hate Terms Management Functions
-      let allHateTerms = [];
+      // Inline Search Terms Functions
+      let allInlineHateTerms = [];
 
-      async function loadHateTerms() {
+      async function loadInlineHateTerms() {
         try {
           const response = await fetch(`${API_BASE}/hate-terms`);
           const data = await response.json();
-
           if (response.ok) {
-            allHateTerms = data.terms || [];
-            displayHateTerms(allHateTerms);
-            updateHateTermsCount(allHateTerms.length);
+            allInlineHateTerms = data.terms || [];
+            displayInlineHateTerms(allInlineHateTerms);
+            updateInlineHateTermsCount(allInlineHateTerms.length);
           } else {
             console.error("Failed to load search terms:", data.error);
-            document.getElementById("hate-terms-results").innerHTML =
+            document.getElementById("inline-hate-terms-results").innerHTML =
               '<p style="text-align: center; color: #ff4444; padding: 20px;">Failed to load search terms</p>';
           }
         } catch (error) {
           console.error("Error loading search terms:", error);
-          document.getElementById("hate-terms-results").innerHTML =
+          document.getElementById("inline-hate-terms-results").innerHTML =
             '<p style="text-align: center; color: #ff4444; padding: 20px;">Error loading search terms</p>';
         }
       }
 
-      function displayHateTerms(terms) {
-        const resultsDiv = document.getElementById("hate-terms-results");
-
+      function displayInlineHateTerms(terms) {
+        const resultsDiv = document.getElementById("inline-hate-terms-results");
         if (terms.length === 0) {
           resultsDiv.innerHTML =
             '<p style="text-align: center; color: #666; padding: 20px;">No search terms configured</p>';
           return;
         }
 
-        // Sort terms alphabetically
         const sortedTerms = [...terms].sort((a, b) =>
           a.toLowerCase().localeCompare(b.toLowerCase())
         );
 
-        resultsDiv.innerHTML = sortedTerms
-          .map(
-            (term) => `
-            <div class="table-row" style="display: grid; grid-template-columns: 1fr 100px; align-items: center; padding: 12px 0;">
-              <div style="color: #e0e0e0; font-size: 14px;">${term}</div>
-              <div class="actions" style="justify-content: center;">
-                <button class="action-button remove-button" 
-                        onclick="removeHateTerm('${term.replace(/'/g, "\\'")}')"
-                        title="Remove search term">
-                  <svg class="icon" viewBox="0 0 24 24">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-          `
-          )
+        const html = sortedTerms
+          .filter((term) => term.length < 100) // Filter out extremely long terms
+          .map((term) => {
+            const escapedTerm = term.replace(/[<>&"']/g, function (m) {
+              return {
+                "<": "&lt;",
+                ">": "&gt;",
+                "&": "&amp;",
+                '"': "&quot;",
+                "'": "&#39;",
+              }[m];
+            });
+            const escapedTermForJS = term.replace(/['"\\]/g, "\\$&");
+            return `
+          <div class="search-term-item" style="display: flex; justify-content: space-between; align-items: center; padding: 4px 6px;">
+            <span class="search-term-text" style="color: #e0e0e0; font-size: 13px;">${escapedTerm}</span>
+            <button class="action-button remove-button" 
+                    onclick="deleteInlineHateTerm('${escapedTermForJS}')"
+                    title="Remove search term">
+              <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+              </svg>
+            </button>
+          </div>`;
+          })
           .join("");
+        resultsDiv.innerHTML = html;
       }
 
-      function filterHateTerms() {
+      function filterInlineHateTerms() {
         const searchTerm = document
-          .getElementById("hate-terms-search")
+          .getElementById("inline-hate-terms-search")
           .value.toLowerCase();
-        const filteredTerms = allHateTerms.filter((term) =>
+        const filteredTerms = allInlineHateTerms.filter((term) =>
           term.toLowerCase().includes(searchTerm)
         );
-        displayHateTerms(filteredTerms);
+        displayInlineHateTerms(filteredTerms);
+        updateInlineHateTermsCount(filteredTerms.length);
       }
 
-      function updateHateTermsCount(count) {
+      function updateInlineHateTermsCount(count) {
         document.getElementById(
-          "hate-terms-count"
+          "inline-hate-terms-count"
         ).textContent = `${count} term${count !== 1 ? "s" : ""}`;
       }
 
-      async function addHateTerm() {
-        const input = document.getElementById("new-hate-term-input");
+      async function addInlineHateTerm() {
+        const input = document.getElementById("inline-new-hate-term-input");
         const term = input.value.trim();
-
         if (!term) {
           showToast("Please enter a term", "error");
           return;
         }
-
         try {
           const response = await fetch(`${API_BASE}/hate-terms`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ term }),
           });
-
           const data = await response.json();
-
           if (response.ok) {
-            showToast(data.message, "success");
             input.value = "";
-            loadHateTerms(); // Reload the list
+            showToast("Search term added successfully", "success");
+            await loadInlineHateTerms();
           } else {
-            showToast(data.error || "Failed to add term", "error");
+            showToast(data.error || "Failed to add search term", "error");
           }
         } catch (error) {
-          console.error("Error adding hate term:", error);
-          showToast("Error adding term", "error");
+          console.error("Error adding search term:", error);
+          showToast("Error adding search term", "error");
         }
       }
 
-      async function removeHateTerm(term) {
-        if (!confirm(`Are you sure you want to remove "${term}"?`)) {
+      async function deleteInlineHateTerm(term) {
+        if (!confirm(`Are you sure you want to delete "${term}"?`)) {
           return;
         }
-
         try {
           const response = await fetch(
             `${API_BASE}/hate-terms/${encodeURIComponent(term)}`,
@@ -2477,42 +2911,45 @@
               method: "DELETE",
             }
           );
-
           const data = await response.json();
-
           if (response.ok) {
-            showToast(data.message, "success");
-            loadHateTerms(); // Reload the list
+            showToast("Search term deleted successfully", "success");
+            await loadInlineHateTerms();
           } else {
-            showToast(data.error || "Failed to remove term", "error");
+            showToast(data.error || "Failed to delete search term", "error");
           }
         } catch (error) {
-          console.error("Error removing hate term:", error);
-          showToast("Error removing term", "error");
+          console.error("Error deleting search term:", error);
+          showToast("Error deleting search term", "error");
         }
       }
 
-      // Add event listener for Enter key on new term input
-      document
-        .getElementById("new-hate-term-input")
-        .addEventListener("keypress", function (e) {
-          if (e.key === "Enter") {
-            addHateTerm();
-          }
-        });
+      // Add event listener for Enter key on inline new term input
+      setTimeout(() => {
+        const inlineInput = document.getElementById(
+          "inline-new-hate-term-input"
+        );
+        if (inlineInput) {
+          inlineInput.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+              addInlineHateTerm();
+            }
+          });
+        }
+      }, 100);
+
+      // Load inline hate terms when page loads
+      setTimeout(() => {
+        loadInlineHateTerms();
+      }, 500);
 
       // Manual Villain Addition Function
       async function addManualVillain() {
         console.log("addManualVillain() called");
 
         const steamIdInput = document.getElementById("manual-steam-id-input");
-        const aliasInput = document.getElementById("manual-alias-input");
-        const addButton = document.querySelector(
-          ".add-villain-section .search-button"
-        );
 
         console.log("Steam ID input element:", steamIdInput);
-        console.log("Alias input element:", aliasInput);
 
         if (!steamIdInput) {
           console.error("Could not find steam ID input element");
@@ -2521,7 +2958,7 @@
         }
 
         const steamId = steamIdInput.value.trim();
-        const alias = aliasInput ? aliasInput.value.trim() : "";
+        const alias = "";
 
         console.log(
           "Steam ID input value:",
@@ -2529,7 +2966,6 @@
           "Length:",
           steamId.length
         );
-        console.log("Alias input value:", `"${alias}"`);
 
         if (!steamId || steamId.length === 0) {
           showToast(
@@ -2540,10 +2976,10 @@
           return;
         }
 
-        // Show loading state
-        const originalText = addButton.textContent;
-        addButton.textContent = "RESOLVING...";
-        addButton.disabled = true;
+        // Show loading state in input placeholder
+        const originalPlaceholder = steamIdInput.placeholder;
+        steamIdInput.placeholder = "Adding villain...";
+        steamIdInput.disabled = true;
 
         // Check if it's a username (not a 17-digit SteamID64)
         const isUsername = !/^\d{17}$/.test(steamId);
@@ -2551,9 +2987,11 @@
 
         if (isUsername) {
           showToast(
-            `Resolving Steam username "${steamId}" via Steam API...`,
+            `Resolving Steam username "${steamId}" and fetching avatar...`,
             "info"
           );
+        } else {
+          showToast(`Adding villain and fetching avatar data...`, "info");
         }
 
         try {
@@ -2575,7 +3013,6 @@
           if (response.ok) {
             showToast(data.message || "Villain added successfully", "success");
             steamIdInput.value = "";
-            if (aliasInput) aliasInput.value = "";
             // Reload villains tab if it's currently active
             const activeTab = document.querySelector(".tab.active");
             if (
@@ -2591,23 +3028,15 @@
           console.error("Error adding manual villain:", error);
           showToast(`Network error: ${error.message}`, "error");
         } finally {
-          // Restore button state
-          addButton.textContent = originalText;
-          addButton.disabled = false;
+          // Restore input state
+          steamIdInput.placeholder = originalPlaceholder;
+          steamIdInput.disabled = false;
         }
       }
 
       // Add event listeners for Enter key on manual villain inputs
       document
         .getElementById("manual-steam-id-input")
-        .addEventListener("keypress", function (e) {
-          if (e.key === "Enter") {
-            addManualVillain();
-          }
-        });
-
-      document
-        .getElementById("manual-alias-input")
         .addEventListener("keypress", function (e) {
           if (e.key === "Enter") {
             addManualVillain();
@@ -2706,6 +3135,82 @@
           closeUserNotesModal();
         }
       });
+
+      // Dynamic Search Functionality - Add event listeners for real-time filtering
+      function setupDynamicSearch() {
+        // Comments tab search - both steamid and comment search inputs
+        const steamidSearchInput = document.querySelector(
+          "#flagged-comments .steamid-search"
+        );
+        const commentSearchInput = document.querySelector(
+          "#flagged-comments .comment-search"
+        );
+
+        if (steamidSearchInput) {
+          steamidSearchInput.addEventListener("input", function () {
+            loadFlaggedComments();
+          });
+        }
+
+        if (commentSearchInput) {
+          commentSearchInput.addEventListener("input", function () {
+            loadFlaggedComments();
+          });
+        }
+
+        // Villains tab search
+        const villainsSearchInput = document.querySelector(
+          "#villains-search-input"
+        );
+        if (villainsSearchInput) {
+          villainsSearchInput.addEventListener("input", function () {
+            loadVillains();
+          });
+        }
+
+        // Reported profiles tab search
+        const reportedSearchInput = document.querySelector(
+          "#reported-profiles .search-input"
+        );
+        if (reportedSearchInput) {
+          reportedSearchInput.addEventListener("input", function () {
+            loadReportedProfiles();
+          });
+        }
+
+        // Monitoring tab search
+        const monitoringSearchInput = document.querySelector(
+          "#further-monitoring .search-input"
+        );
+        if (monitoringSearchInput) {
+          monitoringSearchInput.addEventListener("input", function () {
+            loadFurtherMonitoring();
+          });
+        }
+
+        // Unprocessed profiles tab search
+        const unprocessedSearchInput = document.querySelector(
+          "#unprocessed-profiles .search-input"
+        );
+        if (unprocessedSearchInput) {
+          unprocessedSearchInput.addEventListener("input", function () {
+            loadUnprocessedProfiles();
+          });
+        }
+      }
+
+      // Simple initialization
+      setTimeout(() => {
+        console.log("Basic initialization starting...");
+        try {
+          setupDynamicSearch();
+          console.log("Dynamic search setup complete");
+          loadFlaggedComments();
+          console.log("Load flagged comments called");
+        } catch (error) {
+          console.error("Initialization error:", error);
+        }
+      }, 2000);
     </script>
   </body>
 </html>

@@ -6,7 +6,7 @@ import logging
 import time
 from asyncio import Queue
 from .config import config
-from .steam_api import resolve_steam_url
+from .steam_api import resolve_steam_url, get_player_avatars, serialize_avatar_data
 from .scraper import scrape_profile_comments, check_for_hate_speech, scrape_friends_list
 from .database import PostgresDatabase
 from .report import generate_report
@@ -147,8 +147,6 @@ async def recursive_profile_search(initial_url):
             else:
                 logging.info(f"Search completed normally. Processed {processed_count} profiles")
 
-        # Generate final report
-        generate_report(db)
 
 
 # Update src/recursive_search.py - process_profile_worker function
@@ -245,9 +243,28 @@ async def process_profile_worker(queue, visited_ids, queued_ids, db, session, ra
             inserted_count = db.insert_flagged_comments_batch(flagged_comments_batch)
             logging.info(f"Batch inserted {inserted_count} flagged comments from profile {current_steamid}")
             
-            # Add villains
+            # Add villains with avatar fetching
             for steamid, alias in villains_to_add:
-                db.insert_villain(steamid, alias)
+                try:
+                    # Fetch avatar data for the villain
+                    async with rate_limiter:
+                        avatar_data = await get_player_avatars(steamid, session)
+                    
+                    # Serialize avatar data for database storage
+                    avatar_json = serialize_avatar_data(avatar_data) if avatar_data else None
+                    
+                    # Insert villain with avatar data
+                    db.insert_villain(steamid, alias, profile_pictures=avatar_json)
+                    
+                    if avatar_data:
+                        logging.info(f"Fetched and stored avatar data for villain {steamid}")
+                    else:
+                        logging.warning(f"Could not fetch avatar data for villain {steamid}")
+                        
+                except Exception as e:
+                    logging.error(f"Failed to fetch avatar for villain {steamid}: {e}")
+                    # Still insert the villain without avatar data
+                    db.insert_villain(steamid, alias)
             
             # Queue new profiles only after successful insert
             for profile_data in new_profiles_to_queue:
